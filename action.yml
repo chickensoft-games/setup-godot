@@ -1,0 +1,38 @@
+name: 'Setup Godot Action'
+description: >-
+  Setup Godot for headless use with macOS, Windows, and Linux CI/CD runners.
+author: 'Chickensoft'
+branding:
+  icon: 'hard-drive'
+  color: 'white'
+inputs:
+  version:
+    description: >-
+      Godot 4 version: e.g., 4.0.0-beta1, 4.0.0-beta.16, 4.0.0, etc. Must
+      include major, minor, and patch (additional pre-release label is
+      optional).
+    required: true
+  path:
+    description: >-
+      Path to install Godot to, relative to the current working directory of
+      the action.
+    default: 'godot'
+  downloads-path:
+    description: >-
+      Path to download Godot to, relative to the current working directory of
+      the action.
+    default: 'downloads'
+  bin-path:
+    description: >-
+      Path for binaries to be installed to, relative to the current working
+      directory of the action. This is the path that will be added to the
+      system path.
+    default: 'bin'
+  godot-sharp-release:
+    description: >-
+      Whether to use the release or debug version of GodotSharp.dll. The
+      appropriate version will be symlinked in bin-path.
+    default: 'false'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
