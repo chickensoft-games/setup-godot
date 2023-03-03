@@ -1,0 +1,18 @@
+name: 📦 Release On Push
+on: 
+  push:
+    branches:
+      - main
+
+# See CONTRIBUTING.md for more information on how this action works.
+
+jobs:
+  release-on-push:
+    name: 📦 Release On Push
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: rymndhng/release-on-push-action@master
+        with:
+          bump_version_scheme: minor

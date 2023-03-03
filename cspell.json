@@ -2,6 +2,8 @@
   "words": [
     "Chickensoft",
     "NOLOGO",
-    "OPTOUT"
+    "norelease",
+    "OPTOUT",
+    "rymndhng"
   ]
 }
