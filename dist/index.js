@@ -329,6 +329,9 @@ function getGodotFilename(version, platform) {
     if (label !== '') {
         filename += `-${label}`;
     }
+    else {
+        filename += '-stable';
+    }
     return filename + platform.godotFilenameSuffix;
 }
 exports.getGodotFilename = getGodotFilename;

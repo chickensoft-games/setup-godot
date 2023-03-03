@@ -133,6 +133,8 @@ export function getGodotFilename(
   }
   if (label !== '') {
     filename += `-${label}`
+  } else {
+    filename += '-stable'
   }
 
   return filename + platform.godotFilenameSuffix

@@ -63,13 +63,13 @@ describe('getGodotUrl', () => {
   })
   test('4.0.0', () => {
     expect(getGodotUrl('4.0.0', getPlatform('linux'))).toEqual(
-      'https://downloads.tuxfamily.org/godotengine/4.0/mono/Godot_v4.0_mono_linux_x86_64.zip'
+      'https://downloads.tuxfamily.org/godotengine/4.0/mono/Godot_v4.0-stable_mono_linux_x86_64.zip'
     )
     expect(getGodotUrl('4.0.0', getPlatform('win32'))).toEqual(
-      'https://downloads.tuxfamily.org/godotengine/4.0/mono/Godot_v4.0_mono_win64.zip'
+      'https://downloads.tuxfamily.org/godotengine/4.0/mono/Godot_v4.0-stable_mono_win64.zip'
     )
     expect(getGodotUrl('4.0.0', getPlatform('darwin'))).toEqual(
-      'https://downloads.tuxfamily.org/godotengine/4.0/mono/Godot_v4.0_mono_macos.universal.zip'
+      'https://downloads.tuxfamily.org/godotengine/4.0/mono/Godot_v4.0-stable_mono_macos.universal.zip'
     )
   })
 })

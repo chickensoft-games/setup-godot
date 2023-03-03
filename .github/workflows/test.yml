@@ -37,7 +37,7 @@ jobs:
         with:
           # Version must include major, minor, and patch, and be >= 4.0.0
           # Pre-release label is optional.
-          version: 4.0.0-beta16
+          version: 4.0.0
 
       - name: 🔬 Verify Setup
         run: |
