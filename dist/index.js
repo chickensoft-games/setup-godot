@@ -58,21 +58,23 @@ function run(platform = undefined) {
             .getInput('downloads-path')
             .replace(/\s/g, '');
         const version = core.getInput('version').replace(/\s/g, '');
+        const useDotnet = core.getBooleanInput('use-dotnet');
         const binRelativePath = core.getInput('bin-path').replace(/\s/g, '');
         const godotSharpRelease = core.getBooleanInput('godot-sharp-release');
         // Compute derived information
         const userDir = os.homedir();
         const downloadsDir = path_1.default.join(userDir, downloadsRelativePath);
         const installationDir = path_1.default.join(userDir, pathRelative);
-        const versionName = (0, utils_1.getGodotFilenameFromVersionString)(version, platform);
-        const godotUrl = (0, utils_1.getGodotUrl)(version, platform);
+        const versionName = (0, utils_1.getGodotFilenameFromVersionString)(version, platform, useDotnet);
+        const godotUrl = (0, utils_1.getGodotUrl)(version, platform, useDotnet);
         const godotDownloadPath = path_1.default.join(downloadsDir, `${versionName}.zip`);
-        const godotInstallationPath = platform.getUnzippedPath(installationDir, versionName);
+        const godotInstallationPath = platform.getUnzippedPath(installationDir, versionName, useDotnet);
         const binDir = path_1.default.join(userDir, binRelativePath);
         // Log values
         core.startGroup('🤖 Godot Action Inputs');
         core.info(`🤖 Godot version: ${version}`);
         core.info(`🤖 Godot version name: ${versionName}`);
+        core.info(`🟣 Use .NET: ${useDotnet}`);
         core.info(`🤖 Godot download url: ${godotUrl}`);
         core.info(`🧑‍💼 User directory: ${userDir}`);
         core.info(`🌏 Downloads directory: ${downloadsDir}`);
@@ -141,12 +143,14 @@ function run(platform = undefined) {
             if (!godotExecutable) {
                 throw new Error('🚨 No Godot executable found!');
             }
-            if (!godotSharp) {
+            if (!godotSharp && useDotnet) {
                 throw new Error('🚨 No GodotSharp.dll found!');
             }
             core.startGroup(`🚀 Resolve Godot Executables:`);
             core.info(`🚀 Godot executable found at ${godotExecutable}`);
-            core.info(`🚀 GodotSharp.dll found at ${godotSharp}`);
+            if (useDotnet) {
+                core.info(`🚀 GodotSharp.dll found at ${godotSharp}`);
+            }
             core.endGroup();
             // Add bin directory to PATH
             core.startGroup(`🔦 Update PATH...`);
@@ -156,15 +160,16 @@ function run(platform = undefined) {
             core.endGroup();
             // Create symlink to Godot executable
             const godotAlias = path_1.default.join(binDir, 'godot');
-            const godotSharpDirAlias = path_1.default.join(binDir, 'GodotSharp');
             core.startGroup(`🔗 Creating symlinks to executables...`);
             fs.linkSync(godotExecutable, godotAlias);
             core.info(`✅ Symlink to Godot created`);
-            // Create symlink to GodotSharp directory
-            const godotSharpDir = path_1.default.join(path_1.default.dirname(godotSharp), '../..');
-            // fs.mkdirSync(godotSharpDirAlias, {recursive: true})
-            fs.symlinkSync(godotSharpDir, godotSharpDirAlias);
-            core.info(`✅ Symlink to GodotSharp created at ${godotSharpDirAlias}`);
+            const godotSharpDirAlias = path_1.default.join(binDir, 'GodotSharp');
+            if (useDotnet) {
+                // Create symlink to GodotSharp directory
+                const godotSharpDir = path_1.default.join(path_1.default.dirname(godotSharp), '../..');
+                fs.symlinkSync(godotSharpDir, godotSharpDirAlias);
+                core.info(`✅ Symlink to GodotSharp created at ${godotSharpDirAlias}`);
+            }
             core.endGroup();
             // Add environment variables
             core.startGroup(`🔧 Adding environment variables...`);
@@ -233,38 +238,44 @@ const core = __importStar(__nccwpck_require__(2186));
 const fs = __importStar(__nccwpck_require__(7147));
 const path_1 = __importDefault(__nccwpck_require__(1017));
 class Linux {
-    constructor() {
-        this.godotFilenameSuffix = '_mono_linux_x86_64';
+    godotFilenameSuffix(useDotnet) {
+        if (useDotnet) {
+            return '_mono_linux_x86_64';
+        }
+        return '_linux.x86_64';
     }
     isGodotExecutable(basename) {
         return basename.toLowerCase().endsWith('x86_64');
     }
-    getUnzippedPath(installationDir, versionName) {
+    getUnzippedPath(installationDir, versionName, useDotnet) {
         return path_1.default.join(installationDir, versionName);
     }
 }
 exports.Linux = Linux;
 class Windows {
-    constructor() {
-        this.godotFilenameSuffix = '_mono_win64';
+    godotFilenameSuffix(useDotnet) {
+        if (useDotnet) {
+            return '_mono_win64';
+        }
+        return '_win64.exe';
     }
     isGodotExecutable(basename) {
         return basename.toLowerCase().endsWith('_win64.exe');
     }
-    getUnzippedPath(installationDir, versionName) {
+    getUnzippedPath(installationDir, versionName, useDotnet) {
         return path_1.default.join(installationDir, versionName);
     }
 }
 exports.Windows = Windows;
 class MacOS {
-    constructor() {
-        this.godotFilenameSuffix = '_mono_macos.universal';
+    godotFilenameSuffix(useDotnet) {
+        return `${useDotnet ? '_mono' : ''}_macos.universal`;
     }
     isGodotExecutable(basename) {
         return basename.toLowerCase() === 'godot';
     }
-    getUnzippedPath(installationDir, versionName) {
-        return path_1.default.join(installationDir, 'Godot_mono.app');
+    getUnzippedPath(installationDir, versionName, useDotnet) {
+        return path_1.default.join(installationDir, `Godot${useDotnet ? '_mono' : ''}.app`);
     }
 }
 exports.MacOS = MacOS;
@@ -293,15 +304,16 @@ exports.parseVersion = parseVersion;
  * Returns the Godot download url for the given version and platform.
  * @param versionString Version string.
  * @param platform Current platform instance.
+ * @param useDotnet True to use the .NET-enabled version of Godot.
  * @returns Godot binary download url.
  */
-function getGodotUrl(versionString, platform) {
+function getGodotUrl(versionString, platform, useDotnet) {
     const version = parseVersion(versionString);
     const major = version.major;
     const minor = version.minor;
     const patch = version.patch;
     const label = version.label.replace('.', '');
-    const filename = getGodotFilename(version, platform);
+    const filename = getGodotFilename(version, platform, useDotnet);
     let url = `${GODOT_URL_PREFIX + major}.${minor}`;
     if (patch !== '' && patch !== '0') {
         url += `.${patch}`;
@@ -310,11 +322,16 @@ function getGodotUrl(versionString, platform) {
     if (label !== '') {
         url += `${label}/`;
     }
-    url += `mono/${filename}.zip`;
+    if (useDotnet) {
+        url += `mono/${filename}.zip`;
+    }
+    else {
+        url += `${filename}.zip`;
+    }
     return url;
 }
 exports.getGodotUrl = getGodotUrl;
-function getGodotFilename(version, platform) {
+function getGodotFilename(version, platform, useDotnet) {
     const major = version.major;
     const minor = version.minor;
     const patch = version.patch;
@@ -332,11 +349,11 @@ function getGodotFilename(version, platform) {
     else {
         filename += '-stable';
     }
-    return filename + platform.godotFilenameSuffix;
+    return filename + platform.godotFilenameSuffix(useDotnet);
 }
 exports.getGodotFilename = getGodotFilename;
-function getGodotFilenameFromVersionString(versionString, platform) {
-    return getGodotFilename(parseVersion(versionString), platform);
+function getGodotFilenameFromVersionString(versionString, platform, useDotnet) {
+    return getGodotFilename(parseVersion(versionString), platform, useDotnet);
 }
 exports.getGodotFilenameFromVersionString = getGodotFilenameFromVersionString;
 function getPlatform(processPlatform) {

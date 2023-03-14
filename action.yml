@@ -33,6 +33,10 @@ inputs:
       Whether to use the release or debug version of GodotSharp.dll. The
       appropriate version will be symlinked in bin-path.
     default: 'false'
+  use-dotnet:
+    description: >-
+      True to use the .NET-enabled version of Godot that enables C#, false to use the default version.
+    default: 'true'
 runs:
   using: 'node16'
   main: 'dist/index.js'
