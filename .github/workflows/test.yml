@@ -29,6 +29,7 @@ jobs:
         name: 🧾 Checkout
 
       - uses: actions/setup-dotnet@v3
+        if: ${{ matrix.use-dotnet }}
         name: 💽 Setup .NET SDK
         with:
           dotnet-version: '6.0.x'
@@ -41,7 +42,11 @@ jobs:
           version: 4.0.0
           use-dotnet: ${{ matrix.use-dotnet }}
 
-      - name: 🔬 Verify Setup
+      - name: 🔬 Verify Dotnet
+        if: ${{ matrix.use-dotnet }}
         run: |
           dotnet --version
+
+      - name: 🔬 Verify Godot
+        run: |
           godot --version
