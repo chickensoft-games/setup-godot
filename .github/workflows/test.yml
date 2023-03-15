@@ -8,7 +8,7 @@ on: # rebuild any PRs and main branch changes
 
 jobs:
   tests:
-    name: 🧪 Test on ${{ matrix.os }}
+    name: 🧪 Test on ${{ matrix.os }}, .NET=${{ matrix.use-dotnet }}
     runs-on: ${{ matrix.os }}
     strategy:
       # Don't cancel other OS runners if one fails.
