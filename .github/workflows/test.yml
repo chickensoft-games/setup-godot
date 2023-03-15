@@ -8,7 +8,7 @@ on: # rebuild any PRs and main branch changes
 
 jobs:
   tests:
-    name: 🧪 Test on ${{ matrix.os }}
+    name: 🧪 Test on ${{ matrix.os }}, .NET=${{ matrix.use-dotnet }}
     runs-on: ${{ matrix.os }}
     strategy:
       # Don't cancel other OS runners if one fails.
@@ -16,6 +16,7 @@ jobs:
       matrix:
         # Put the operating systems you want to run on here.
         os: [ubuntu-latest, macos-latest, windows-latest]
+        use-dotnet: [false, true]
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: true
       DOTNET_NOLOGO: true
@@ -28,6 +29,7 @@ jobs:
         name: 🧾 Checkout
 
       - uses: actions/setup-dotnet@v3
+        if: ${{ matrix.use-dotnet }}
         name: 💽 Setup .NET SDK
         with:
           dotnet-version: '6.0.x'
@@ -38,8 +40,13 @@ jobs:
           # Version must include major, minor, and patch, and be >= 4.0.0
           # Pre-release label is optional.
           version: 4.0.0
+          use-dotnet: ${{ matrix.use-dotnet }}
 
-      - name: 🔬 Verify Setup
+      - name: 🔬 Verify Dotnet
+        if: ${{ matrix.use-dotnet }}
         run: |
           dotnet --version
+
+      - name: 🔬 Verify Godot
+        run: |
           godot --version

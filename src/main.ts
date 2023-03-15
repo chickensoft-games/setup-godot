@@ -22,6 +22,7 @@ async function run(platform: Platform | undefined = undefined): Promise<void> {
     .getInput('downloads-path')
     .replace(/\s/g, '')
   const version = core.getInput('version').replace(/\s/g, '')
+  const useDotnet = core.getBooleanInput('use-dotnet')
   const binRelativePath = core.getInput('bin-path').replace(/\s/g, '')
   const godotSharpRelease = core.getBooleanInput('godot-sharp-release')
 
@@ -29,12 +30,17 @@ async function run(platform: Platform | undefined = undefined): Promise<void> {
   const userDir = os.homedir()
   const downloadsDir = path.join(userDir, downloadsRelativePath)
   const installationDir = path.join(userDir, pathRelative)
-  const versionName = getGodotFilenameFromVersionString(version, platform)
-  const godotUrl = getGodotUrl(version, platform)
+  const versionName = getGodotFilenameFromVersionString(
+    version,
+    platform,
+    useDotnet
+  )
+  const godotUrl = getGodotUrl(version, platform, useDotnet)
   const godotDownloadPath = path.join(downloadsDir, `${versionName}.zip`)
   const godotInstallationPath = platform.getUnzippedPath(
     installationDir,
-    versionName
+    versionName,
+    useDotnet
   )
   const binDir = path.join(userDir, binRelativePath)
 
@@ -42,6 +48,7 @@ async function run(platform: Platform | undefined = undefined): Promise<void> {
   core.startGroup('🤖 Godot Action Inputs')
   core.info(`🤖 Godot version: ${version}`)
   core.info(`🤖 Godot version name: ${versionName}`)
+  core.info(`🟣 Use .NET: ${useDotnet}`)
   core.info(`🤖 Godot download url: ${godotUrl}`)
   core.info(`🧑‍💼 User directory: ${userDir}`)
   core.info(`🌏 Downloads directory: ${downloadsDir}`)
@@ -139,13 +146,15 @@ async function run(platform: Platform | undefined = undefined): Promise<void> {
       throw new Error('🚨 No Godot executable found!')
     }
 
-    if (!godotSharp) {
+    if (!godotSharp && useDotnet) {
       throw new Error('🚨 No GodotSharp.dll found!')
     }
 
     core.startGroup(`🚀 Resolve Godot Executables:`)
     core.info(`🚀 Godot executable found at ${godotExecutable}`)
-    core.info(`🚀 GodotSharp.dll found at ${godotSharp}`)
+    if (useDotnet) {
+      core.info(`🚀 GodotSharp.dll found at ${godotSharp}`)
+    }
     core.endGroup()
 
     // Add bin directory to PATH
@@ -157,15 +166,16 @@ async function run(platform: Platform | undefined = undefined): Promise<void> {
 
     // Create symlink to Godot executable
     const godotAlias = path.join(binDir, 'godot')
-    const godotSharpDirAlias = path.join(binDir, 'GodotSharp')
     core.startGroup(`🔗 Creating symlinks to executables...`)
     fs.linkSync(godotExecutable, godotAlias)
     core.info(`✅ Symlink to Godot created`)
-    // Create symlink to GodotSharp directory
-    const godotSharpDir = path.join(path.dirname(godotSharp), '../..')
-    // fs.mkdirSync(godotSharpDirAlias, {recursive: true})
-    fs.symlinkSync(godotSharpDir, godotSharpDirAlias)
-    core.info(`✅ Symlink to GodotSharp created at ${godotSharpDirAlias}`)
+    const godotSharpDirAlias = path.join(binDir, 'GodotSharp')
+    if (useDotnet) {
+      // Create symlink to GodotSharp directory
+      const godotSharpDir = path.join(path.dirname(godotSharp), '../..')
+      fs.symlinkSync(godotSharpDir, godotSharpDirAlias)
+      core.info(`✅ Symlink to GodotSharp created at ${godotSharpDirAlias}`)
+    }
     core.endGroup()
 
     // Add environment variables
