@@ -66,10 +66,13 @@ function run(platform = undefined) {
         const downloadsDir = path_1.default.join(userDir, downloadsRelativePath);
         const installationDir = path_1.default.join(userDir, pathRelative);
         const versionName = (0, utils_1.getGodotFilenameFromVersionString)(version, platform, useDotnet);
-        const godotUrl = (0, utils_1.getGodotUrl)(version, platform, useDotnet);
+        const godotUrl = (0, utils_1.getGodotUrl)(version, platform, useDotnet, false);
         const godotDownloadPath = path_1.default.join(downloadsDir, `${versionName}.zip`);
         const godotInstallationPath = platform.getUnzippedPath(installationDir, versionName, useDotnet);
         const binDir = path_1.default.join(userDir, binRelativePath);
+        const exportTemplateUrl = (0, utils_1.getGodotUrl)(version, platform, useDotnet, true);
+        const exportTemplatePath = (0, utils_1.getExportTemplatePath)(version, platform, useDotnet);
+        const exportTemplateDownloadPath = path_1.default.join(downloadsDir, 'export_templates.zip');
         // Log values
         core.startGroup('🤖 Godot Action Inputs');
         core.info(`🤖 Godot version: ${version}`);
@@ -81,6 +84,9 @@ function run(platform = undefined) {
         core.info(`📥 Godot download path: ${godotDownloadPath}`);
         core.info(`📦 Godot installation directory: ${installationDir}`);
         core.info(`🤖 Godot installation path: ${godotInstallationPath}`);
+        core.info(`🤖 Export Template url: ${exportTemplateUrl}`);
+        core.info(`📥 Export Template download path: ${exportTemplateDownloadPath}`);
+        core.info(`🤖 Export Template Path: ${exportTemplatePath}`);
         core.info(`📂 Bin directory: ${binDir}`);
         core.info(`🤖 GodotSharp release: ${godotSharpRelease}`);
         core.endGroup();
@@ -94,7 +100,7 @@ function run(platform = undefined) {
             core.endGroup();
             // See if Godot is already installed.
             core.startGroup(`🤔 Checking if Godot is already in cache...`);
-            const cached = yield cache.restoreCache([godotInstallationPath], godotUrl);
+            const cached = yield cache.restoreCache([godotInstallationPath, exportTemplatePath], godotUrl);
             let executables;
             if (!cached) {
                 // Download Godot
@@ -104,19 +110,34 @@ function run(platform = undefined) {
                 const godotDownloadedPath = yield toolsCache.downloadTool(godotUrl, godotDownloadPath);
                 core.info(`✅ Godot downloaded to ${godotDownloadedPath}`);
                 core.endGroup();
+                core.startGroup(`📥 Downloading Export Templates to ${exportTemplateDownloadPath}...`);
+                const templateDownloadedPath = yield toolsCache.downloadTool(exportTemplateUrl, exportTemplateDownloadPath);
+                core.info(`✅ Export Templates downloaded to ${templateDownloadedPath}`);
+                core.endGroup();
                 // Extract Godot
                 core.startGroup(`📦 Extracting Godot to ${installationDir}...`);
                 const godotExtractedPath = yield toolsCache.extractZip(godotDownloadedPath, installationDir);
                 core.info(`✅ Godot extracted to ${godotExtractedPath}`);
                 core.endGroup();
-                // Show extracted files recursively and list executables.
+                // Show extracted Godot files recursively and list executables.
                 core.startGroup(`📄 Showing extracted files recursively...`);
                 executables = yield (0, utils_1.findExecutablesRecursively)(platform, installationDir, '');
                 core.info(`✅ Files shown`);
                 core.endGroup();
+                core.startGroup(`📦 Extracting Export Templates to ${exportTemplatePath}...`);
+                const exportTemplateExtractedPath = yield toolsCache.extractZip(templateDownloadedPath, path_1.default.dirname(exportTemplatePath));
+                core.info(`✅ Export Templates extracted to ${exportTemplateExtractedPath}`);
+                fs.renameSync(path_1.default.join(exportTemplateExtractedPath, 'templates'), exportTemplatePath);
+                core.info(`✅ ${path_1.default.join(path_1.default.dirname(exportTemplateExtractedPath), 'templates')} moved to ${exportTemplatePath}`);
+                core.endGroup();
+                // Show extracted Export Template files recursively
+                core.startGroup(`📄 Showing extracted files recursively...`);
+                yield (0, utils_1.findExecutablesRecursively)(platform, exportTemplatePath, '');
+                core.info(`✅ Files shown`);
+                core.endGroup();
                 // Save extracted Godot contents to cache
                 core.startGroup(`💾 Saving extracted Godot download to cache...`);
-                yield cache.saveCache([godotInstallationPath], godotUrl);
+                yield cache.saveCache([godotInstallationPath, exportTemplatePath], godotUrl);
                 core.info(`✅ Godot saved to cache`);
                 core.endGroup();
             }
@@ -125,6 +146,7 @@ function run(platform = undefined) {
                 core.endGroup();
                 core.startGroup(`📄 Showing cached files recursively...`);
                 executables = yield (0, utils_1.findExecutablesRecursively)(platform, installationDir, '');
+                yield (0, utils_1.findExecutablesRecursively)(platform, exportTemplatePath, '');
                 core.info(`✅ Files shown`);
                 core.endGroup();
             }
@@ -233,11 +255,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.findExecutablesRecursively = exports.getPlatform = exports.getGodotFilenameFromVersionString = exports.getGodotFilename = exports.getGodotUrl = exports.parseVersion = exports.MacOS = exports.Windows = exports.Linux = void 0;
+exports.findExecutablesRecursively = exports.getPlatform = exports.getGodotFilenameFromVersionString = exports.getGodotFilenameBase = exports.getGodotFilename = exports.getExportTemplatePath = exports.getGodotUrl = exports.parseVersion = exports.MacOS = exports.Windows = exports.Linux = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const fs = __importStar(__nccwpck_require__(7147));
 const path_1 = __importDefault(__nccwpck_require__(1017));
+const os_1 = __importDefault(__nccwpck_require__(2037));
 class Linux {
+    constructor() {
+        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path_1.default.join(os_1.default.homedir(), '.local/share/godot');
+    }
     godotFilenameSuffix(useDotnet) {
         if (useDotnet) {
             return '_mono_linux_x86_64';
@@ -253,6 +279,9 @@ class Linux {
 }
 exports.Linux = Linux;
 class Windows {
+    constructor() {
+        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path_1.default.join(os_1.default.homedir(), '\\AppData\\Roaming\\Godot');
+    }
     godotFilenameSuffix(useDotnet) {
         if (useDotnet) {
             return '_mono_win64';
@@ -268,6 +297,9 @@ class Windows {
 }
 exports.Windows = Windows;
 class MacOS {
+    constructor() {
+        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path_1.default.join(os_1.default.homedir(), '/Library/Application Support/Godot/');
+    }
     godotFilenameSuffix(useDotnet) {
         return `${useDotnet ? '_mono' : ''}_macos.universal`;
     }
@@ -305,15 +337,15 @@ exports.parseVersion = parseVersion;
  * @param versionString Version string.
  * @param platform Current platform instance.
  * @param useDotnet True to use the .NET-enabled version of Godot.
+ * @param isTemplate True to return the url for the template
  * @returns Godot binary download url.
  */
-function getGodotUrl(versionString, platform, useDotnet) {
+function getGodotUrl(versionString, platform, useDotnet, isTemplate) {
     const version = parseVersion(versionString);
     const major = version.major;
     const minor = version.minor;
     const patch = version.patch;
     const label = version.label.replace('.', '');
-    const filename = getGodotFilename(version, platform, useDotnet);
     let url = `${GODOT_URL_PREFIX + major}.${minor}`;
     if (patch !== '' && patch !== '0') {
         url += `.${patch}`;
@@ -322,16 +354,46 @@ function getGodotUrl(versionString, platform, useDotnet) {
     if (label !== '') {
         url += `${label}/`;
     }
-    if (useDotnet) {
-        url += `mono/${filename}.zip`;
-    }
-    else {
-        url += `${filename}.zip`;
-    }
-    return url;
+    if (useDotnet)
+        url += `mono/`;
+    if (!isTemplate)
+        return `${url}${getGodotFilename(version, platform, useDotnet)}.zip`;
+    return `${url}${getGodotFilenameBase(version)}${useDotnet ? '_mono' : ''}_export_templates.tpz`;
 }
 exports.getGodotUrl = getGodotUrl;
+/**
+ * Returns the Godot export template local path
+ * @param versionString Version string.
+ * @param platform Current platform instance.
+ * @param useDotnet True to use the .NET-enabled version of Godot.
+ * @returns export template local path
+ */
+function getExportTemplatePath(versionString, platform, useDotnet) {
+    const version = parseVersion(versionString);
+    const major = version.major;
+    const minor = version.minor;
+    const patch = version.patch;
+    const label = version.label.replace('.', '');
+    let folderName = `${major}.${minor}`;
+    if (patch !== '' && patch !== '0') {
+        folderName += `.${patch}`;
+    }
+    if (label !== '') {
+        folderName += `.${label}`;
+    }
+    else {
+        folderName += '.stable';
+    }
+    if (useDotnet)
+        folderName += '.mono';
+    return path_1.default.join(platform.GODOT_EXPORT_TEMPLATE_BASE_PATH, version.major === '4' ? 'export_templates' : 'templates', folderName);
+}
+exports.getExportTemplatePath = getExportTemplatePath;
 function getGodotFilename(version, platform, useDotnet) {
+    return getGodotFilenameBase(version) + platform.godotFilenameSuffix(useDotnet);
+}
+exports.getGodotFilename = getGodotFilename;
+function getGodotFilenameBase(version) {
     const major = version.major;
     const minor = version.minor;
     const patch = version.patch;
@@ -349,9 +411,9 @@ function getGodotFilename(version, platform, useDotnet) {
     else {
         filename += '-stable';
     }
-    return filename + platform.godotFilenameSuffix(useDotnet);
+    return filename;
 }
-exports.getGodotFilename = getGodotFilename;
+exports.getGodotFilenameBase = getGodotFilenameBase;
 function getGodotFilenameFromVersionString(versionString, platform, useDotnet) {
     return getGodotFilename(parseVersion(versionString), platform, useDotnet);
 }
