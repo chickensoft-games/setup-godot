@@ -258,8 +258,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.findExecutablesRecursively = exports.getPlatform = exports.getGodotFilenameFromVersionString = exports.getGodotFilenameBase = exports.getGodotFilename = exports.getExportTemplatePath = exports.getGodotUrl = exports.parseVersion = exports.MacOS = exports.Windows = exports.Linux = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const fs = __importStar(__nccwpck_require__(7147));
-const path_1 = __importDefault(__nccwpck_require__(1017));
+const normalize_path_1 = __importDefault(__nccwpck_require__(5388));
 const os_1 = __importDefault(__nccwpck_require__(2037));
+const path_1 = __importDefault(__nccwpck_require__(1017));
 class Linux {
     constructor() {
         this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path_1.default.join(os_1.default.homedir(), '.local/share/godot');
@@ -280,7 +281,7 @@ class Linux {
 exports.Linux = Linux;
 class Windows {
     constructor() {
-        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path_1.default.join(os_1.default.homedir(), '\\AppData\\Roaming\\Godot');
+        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path_1.default.normalize(path_1.default.join(os_1.default.homedir(), '\\AppData\\Roaming\\Godot'));
     }
     godotFilenameSuffix(useDotnet) {
         if (useDotnet) {
@@ -386,7 +387,7 @@ function getExportTemplatePath(versionString, platform, useDotnet) {
     }
     if (useDotnet)
         folderName += '.mono';
-    return path_1.default.join(platform.GODOT_EXPORT_TEMPLATE_BASE_PATH, version.major === '4' ? 'export_templates' : 'templates', folderName);
+    return (0, normalize_path_1.default)(path_1.default.join(platform.GODOT_EXPORT_TEMPLATE_BASE_PATH, version.major === '4' ? 'export_templates' : 'templates', folderName));
 }
 exports.getExportTemplatePath = getExportTemplatePath;
 function getGodotFilename(version, platform, useDotnet) {
@@ -51365,6 +51366,48 @@ exports.Headers = Headers;
 exports.Request = Request;
 exports.Response = Response;
 exports.FetchError = FetchError;
+
+
+/***/ }),
+
+/***/ 5388:
+/***/ ((module) => {
+
+/*!
+ * normalize-path <https://github.com/jonschlinkert/normalize-path>
+ *
+ * Copyright (c) 2014-2018, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+module.exports = function(path, stripTrailing) {
+  if (typeof path !== 'string') {
+    throw new TypeError('expected path to be a string');
+  }
+
+  if (path === '\\' || path === '/') return '/';
+
+  var len = path.length;
+  if (len <= 1) return path;
+
+  // ensure that win32 namespaces has two leading slashes, so that the path is
+  // handled properly by the win32 version of path.parse() after being normalized
+  // https://msdn.microsoft.com/library/windows/desktop/aa365247(v=vs.85).aspx#namespaces
+  var prefix = '';
+  if (len > 4 && path[3] === '\\') {
+    var ch = path[2];
+    if ((ch === '?' || ch === '.') && path.slice(0, 2) === '\\\\') {
+      path = path.slice(2);
+      prefix = '//';
+    }
+  }
+
+  var segs = path.split(/[/\\]+/);
+  if (stripTrailing !== false && segs[segs.length - 1] === '') {
+    segs.pop();
+  }
+  return prefix + segs.join('/');
+};
 
 
 /***/ }),

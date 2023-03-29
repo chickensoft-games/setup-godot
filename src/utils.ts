@@ -1,7 +1,8 @@
 import * as core from '@actions/core'
 import * as fs from 'fs'
-import path from 'path'
+import normalize from 'normalize-path'
 import os from 'os'
+import path from 'path'
 
 export interface Platform {
   /** Godot installation filename suffix. */
@@ -51,9 +52,8 @@ export class Linux implements Platform {
 }
 
 export class Windows implements Platform {
-  GODOT_EXPORT_TEMPLATE_BASE_PATH = path.join(
-    os.homedir(),
-    '\\AppData\\Roaming\\Godot'
+  GODOT_EXPORT_TEMPLATE_BASE_PATH = path.normalize(
+    path.join(os.homedir(), '\\AppData\\Roaming\\Godot')
   )
 
   godotFilenameSuffix(useDotnet: boolean): string {
@@ -200,10 +200,12 @@ export function getExportTemplatePath(
   }
   if (useDotnet) folderName += '.mono'
 
-  return path.join(
-    platform.GODOT_EXPORT_TEMPLATE_BASE_PATH,
-    version.major === '4' ? 'export_templates' : 'templates',
-    folderName
+  return normalize(
+    path.join(
+      platform.GODOT_EXPORT_TEMPLATE_BASE_PATH,
+      version.major === '4' ? 'export_templates' : 'templates',
+      folderName
+    )
   )
 }
 
