@@ -1,6 +1,6 @@
 import {describe, expect, test} from '@jest/globals'
-import os from 'os'
-import path from 'path'
+import * as os from 'os'
+import * as path from 'path'
 
 import {
   getExportTemplatePath,

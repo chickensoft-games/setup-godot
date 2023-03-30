@@ -1,8 +1,8 @@
 import * as core from '@actions/core'
 import * as fs from 'fs'
 import normalize from 'normalize-path'
-import os from 'os'
-import path from 'path'
+import * as os from 'os'
+import * as path from 'path'
 
 export interface Platform {
   /** Godot installation filename suffix. */
