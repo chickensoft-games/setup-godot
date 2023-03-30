@@ -1,6 +1,6 @@
 name: 'build-test-global-json'
 on: # rebuild any PRs and main branch changes
-  # pull_request:
+  pull_request:
   push:
 
 jobs:
