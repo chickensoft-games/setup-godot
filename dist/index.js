@@ -49,22 +49,40 @@ const fs = __importStar(__nccwpck_require__(7147));
 const os = __importStar(__nccwpck_require__(2037));
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const utils_1 = __nccwpck_require__(918);
-function run(platform = undefined) {
+function run(platform) {
+    var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function* () {
-        platform = platform !== null && platform !== void 0 ? platform : (0, utils_1.getPlatform)(process.platform);
         // Get action inputs
         const pathRelative = core.getInput('path').replace(/\s/g, '');
         const downloadsRelativePath = core
             .getInput('downloads-path')
             .replace(/\s/g, '');
-        const version = core.getInput('version').replace(/\s/g, '');
+        let version = core.getInput('version').replace(/\s/g, '');
         const useDotnet = core.getBooleanInput('use-dotnet');
         const binRelativePath = core.getInput('bin-path').replace(/\s/g, '');
         const godotSharpRelease = core.getBooleanInput('godot-sharp-release');
-        // Compute derived information
+        const checkoutDirectory = (_a = process.env['GITHUB_WORKSPACE']) !== null && _a !== void 0 ? _a : '';
         const userDir = os.homedir();
         const downloadsDir = path_1.default.join(userDir, downloadsRelativePath);
         const installationDir = path_1.default.join(userDir, pathRelative);
+        // Log values
+        core.startGroup('🏝 Environment Information');
+        core.info(`📁 Checkout directory: ${checkoutDirectory}`);
+        // See if Godot version needs to be inferred from a global.json file.
+        if (version.toLowerCase().includes('global')) {
+            const globalJsonPath = path_1.default.join(checkoutDirectory, 'global.json');
+            const hasGlobalJsonFile = fs.existsSync(globalJsonPath);
+            core.info(`📢 Inferring Godot version from global.json file.`);
+            core.info(`🌐 global.json file path: ${globalJsonPath}`);
+            core.info(`🌐 global.json file exists: ${hasGlobalJsonFile}`);
+            if (!hasGlobalJsonFile) {
+                throw new Error(`🚨 Cannot find global.json file to infer the Godot version from.`);
+            }
+            const globalJsonFileContents = fs.readFileSync('global.json', 'utf8');
+            const globalJson = (_b = JSON.parse(globalJsonFileContents)) !== null && _b !== void 0 ? _b : {};
+            version = (_c = globalJson['msbuild-sdks']['Godot.NET.Sdk']) !== null && _c !== void 0 ? _c : '';
+        }
+        // Compute derived information from Godot version.
         const versionName = (0, utils_1.getGodotFilenameFromVersionString)(version, platform, useDotnet);
         const godotUrl = (0, utils_1.getGodotUrl)(version, platform, useDotnet, false);
         const godotDownloadPath = path_1.default.join(downloadsDir, `${versionName}.zip`);
@@ -73,8 +91,6 @@ function run(platform = undefined) {
         const exportTemplateUrl = (0, utils_1.getGodotUrl)(version, platform, useDotnet, true);
         const exportTemplatePath = (0, utils_1.getExportTemplatePath)(version, platform, useDotnet);
         const exportTemplateDownloadPath = path_1.default.join(downloadsDir, 'export_templates.zip');
-        // Log values
-        core.startGroup('🤖 Godot Action Inputs');
         core.info(`🤖 Godot version: ${version}`);
         core.info(`🤖 Godot version name: ${versionName}`);
         core.info(`🟣 Use .NET: ${useDotnet}`);
@@ -209,7 +225,7 @@ function run(platform = undefined) {
         }
     });
 }
-run();
+run((0, utils_1.getPlatform)(process.platform));
 
 
 /***/ }),
@@ -259,11 +275,11 @@ exports.findExecutablesRecursively = exports.getPlatform = exports.getGodotFilen
 const core = __importStar(__nccwpck_require__(2186));
 const fs = __importStar(__nccwpck_require__(7147));
 const normalize_path_1 = __importDefault(__nccwpck_require__(5388));
-const os_1 = __importDefault(__nccwpck_require__(2037));
-const path_1 = __importDefault(__nccwpck_require__(1017));
+const os = __importStar(__nccwpck_require__(2037));
+const path = __importStar(__nccwpck_require__(1017));
 class Linux {
     constructor() {
-        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path_1.default.join(os_1.default.homedir(), '.local/share/godot');
+        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path.join(os.homedir(), '.local/share/godot');
     }
     godotFilenameSuffix(useDotnet) {
         if (useDotnet) {
@@ -275,13 +291,13 @@ class Linux {
         return basename.toLowerCase().endsWith('x86_64');
     }
     getUnzippedPath(installationDir, versionName, useDotnet) {
-        return path_1.default.join(installationDir, versionName);
+        return path.join(installationDir, versionName);
     }
 }
 exports.Linux = Linux;
 class Windows {
     constructor() {
-        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path_1.default.normalize(path_1.default.join(os_1.default.homedir(), '\\AppData\\Roaming\\Godot'));
+        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path.normalize(path.join(os.homedir(), '\\AppData\\Roaming\\Godot'));
     }
     godotFilenameSuffix(useDotnet) {
         if (useDotnet) {
@@ -293,13 +309,13 @@ class Windows {
         return basename.toLowerCase().endsWith('_win64.exe');
     }
     getUnzippedPath(installationDir, versionName, useDotnet) {
-        return path_1.default.join(installationDir, versionName);
+        return path.join(installationDir, versionName);
     }
 }
 exports.Windows = Windows;
 class MacOS {
     constructor() {
-        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path_1.default.join(os_1.default.homedir(), '/Library/Application Support/Godot/');
+        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path.join(os.homedir(), '/Library/Application Support/Godot/');
     }
     godotFilenameSuffix(useDotnet) {
         return `${useDotnet ? '_mono' : ''}_macos.universal`;
@@ -308,7 +324,7 @@ class MacOS {
         return basename.toLowerCase() === 'godot';
     }
     getUnzippedPath(installationDir, versionName, useDotnet) {
-        return path_1.default.join(installationDir, `Godot${useDotnet ? '_mono' : ''}.app`);
+        return path.join(installationDir, `Godot${useDotnet ? '_mono' : ''}.app`);
     }
 }
 exports.MacOS = MacOS;
@@ -387,7 +403,7 @@ function getExportTemplatePath(versionString, platform, useDotnet) {
     }
     if (useDotnet)
         folderName += '.mono';
-    return (0, normalize_path_1.default)(path_1.default.join(platform.GODOT_EXPORT_TEMPLATE_BASE_PATH, version.major === '4' ? 'export_templates' : 'templates', folderName));
+    return (0, normalize_path_1.default)(path.join(platform.GODOT_EXPORT_TEMPLATE_BASE_PATH, version.major === '4' ? 'export_templates' : 'templates', folderName));
 }
 exports.getExportTemplatePath = getExportTemplatePath;
 function getGodotFilename(version, platform, useDotnet) {
@@ -441,7 +457,7 @@ function findExecutablesRecursively(platform, dir, indent) {
         let executables = [];
         const files = yield fs.promises.readdir(dir, { withFileTypes: true });
         for (const file of files) {
-            const filePath = path_1.default.join(dir, file.name);
+            const filePath = path.join(dir, file.name);
             if (file.isDirectory()) {
                 const additionalExecutables = yield findExecutablesRecursively(platform, filePath, `${indent}  `);
                 executables = executables.concat(additionalExecutables);

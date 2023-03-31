@@ -80,7 +80,41 @@ jobs:
 
 ## Inputs
 
-See [action.yml][action] for information about the action's inputs.
+See [action.yml][action] for the complete guide to all of the action's inputs.
+
+### Specifying the Godot Version
+
+The Godot version should be specified the same as any [GodotSharp] version string: e.g., `4.0.0-beta1`, `4.0.0-beta.16`, `4.0.0`, etc.
+
+In place of a version, you can specify `global` or `global.json` to use the version of Godot specified by the project's global.json file.
+
+```yaml
+  - uses: chickensoft-games/setup-godot@v1
+    name: 🤖 Setup Godot
+    with:
+      version: global.json # use Godot version specified by global.json
+```
+
+For that to work, your project must have a `global.json` file in the root directory with contents similar to the following.
+
+```json
+{
+  "sdk": {
+    "version": "6.0.406",
+    "rollForward": "latestMinor"
+  },
+  "msbuild-sdks": {
+    "Godot.NET.Sdk": "4.0.0"
+  }
+}
+```
+
+**Important:** If using a global.json file in your project, do *not* specify the version of the Godot.NET.Sdk in your project's `.csproj` file. Note that Godot tends to add this back to your `.csproj` file every time you save the Godot project, so discard those changes before committing to source control.
+
+```xml
+<Project Sdk="Godot.NET.Sdk"> <!-- GOOD -->
+<Project Sdk="Godot.NET.Sdk/4.0.0"> <!-- BAD -->
+```
 
 [chickensoft-badge]: https://raw.githubusercontent.com/chickensoft-games/chickensoft_site/main/static/img/badges/chickensoft_badge.svg
 [chickensoft-website]: https://chickensoft.games
@@ -89,3 +123,4 @@ See [action.yml][action] for information about the action's inputs.
 [read-the-docs-badge]: https://raw.githubusercontent.com/chickensoft-games/chickensoft_site/main/static/img/badges/read_the_docs_badge.svg
 [docs]: https://chickensoft.games/docs
 [action]: ./action.yml
+[GodotSharp]: https://www.nuget.org/packages/GodotSharp#versions-body-tab

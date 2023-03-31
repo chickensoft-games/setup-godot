@@ -8,9 +8,34 @@ branding:
 inputs:
   version:
     description: >-
-      Godot 4 version: e.g., 4.0.0-beta1, 4.0.0-beta.16, 4.0.0, etc. Must
-      include major, minor, and patch (additional pre-release label is
-      optional).
+      Godot 4 version: e.g., 4.0.0-beta1, 4.0.0-beta.16, 4.0.0, etc. Must include major, minor, and patch (additional pre-release label is optional). Specify `global` or `global.json` to use the version from the project's global.json file.
+
+      ```yaml
+      - uses: chickensoft/setup-godot-action@v1
+        with:
+          version: global
+      ```
+
+      In the root of your project, include a global.json file:
+
+      ```json
+      {
+        "sdk": {
+          "version": "6.0.406",
+          "rollForward": "latestMinor"
+        },
+        "msbuild-sdks": {
+          "Godot.NET.Sdk": "4.0.0"
+        }
+      }
+      ```
+
+      **Important:** If using a global.json file in your project, do *not* specify the version of the Godot.NET.Sdk in your project's `*.csproj` file.
+
+      ```xml
+      <Project Sdk="Godot.NET.Sdk"> <!-- GOOD -->
+      <Project Sdk="Godot.NET.Sdk/4.0.0"> <!-- BAD -->
+      ```
     required: true
   path:
     description: >-

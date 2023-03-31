@@ -14,23 +14,44 @@ import {
   Platform
 } from './utils'
 
-async function run(platform: Platform | undefined = undefined): Promise<void> {
-  platform = platform ?? getPlatform(process.platform)
-
+async function run(platform: Platform): Promise<void> {
   // Get action inputs
   const pathRelative = core.getInput('path').replace(/\s/g, '')
   const downloadsRelativePath = core
     .getInput('downloads-path')
     .replace(/\s/g, '')
-  const version = core.getInput('version').replace(/\s/g, '')
+  let version = core.getInput('version').replace(/\s/g, '')
   const useDotnet = core.getBooleanInput('use-dotnet')
   const binRelativePath = core.getInput('bin-path').replace(/\s/g, '')
   const godotSharpRelease = core.getBooleanInput('godot-sharp-release')
+  const checkoutDirectory = process.env['GITHUB_WORKSPACE'] ?? ''
 
-  // Compute derived information
   const userDir = os.homedir()
   const downloadsDir = path.join(userDir, downloadsRelativePath)
   const installationDir = path.join(userDir, pathRelative)
+
+  // Log values
+  core.startGroup('🏝 Environment Information')
+  core.info(`📁 Checkout directory: ${checkoutDirectory}`)
+
+  // See if Godot version needs to be inferred from a global.json file.
+  if (version.toLowerCase().includes('global')) {
+    const globalJsonPath = path.join(checkoutDirectory, 'global.json')
+    const hasGlobalJsonFile = fs.existsSync(globalJsonPath)
+    core.info(`📢 Inferring Godot version from global.json file.`)
+    core.info(`🌐 global.json file path: ${globalJsonPath}`)
+    core.info(`🌐 global.json file exists: ${hasGlobalJsonFile}`)
+    if (!hasGlobalJsonFile) {
+      throw new Error(
+        `🚨 Cannot find global.json file to infer the Godot version from.`
+      )
+    }
+    const globalJsonFileContents = fs.readFileSync('global.json', 'utf8')
+    const globalJson = JSON.parse(globalJsonFileContents) ?? {}
+    version = globalJson['msbuild-sdks']['Godot.NET.Sdk'] ?? ''
+  }
+
+  // Compute derived information from Godot version.
   const versionName = getGodotFilenameFromVersionString(
     version,
     platform,
@@ -52,8 +73,6 @@ async function run(platform: Platform | undefined = undefined): Promise<void> {
     'export_templates.zip'
   )
 
-  // Log values
-  core.startGroup('🤖 Godot Action Inputs')
   core.info(`🤖 Godot version: ${version}`)
   core.info(`🤖 Godot version name: ${versionName}`)
   core.info(`🟣 Use .NET: ${useDotnet}`)
@@ -188,7 +207,7 @@ async function run(platform: Platform | undefined = undefined): Promise<void> {
     core.endGroup()
 
     const godotExecutable = executables.find(exe =>
-      platform!.isGodotExecutable(path.basename(exe))
+      platform.isGodotExecutable(path.basename(exe))
     )
     const godotSharp = executables.find(exe => {
       const file = exe.toLowerCase()
@@ -250,4 +269,4 @@ async function run(platform: Platform | undefined = undefined): Promise<void> {
   }
 }
 
-run()
+run(getPlatform(process.platform))
