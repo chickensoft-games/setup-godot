@@ -70,7 +70,7 @@ function run(platform) {
         core.info(`📁 Checkout directory: ${checkoutDirectory}`);
         // See if Godot version needs to be inferred from a global.json file.
         if (version.toLowerCase().includes('global')) {
-            const globalJsonPath = path_1.default.join(checkoutDirectory, 'global.json');
+            const globalJsonPath = path_1.default.join(checkoutDirectory, version);
             const hasGlobalJsonFile = fs.existsSync(globalJsonPath);
             core.info(`📢 Inferring Godot version from global.json file.`);
             core.info(`🌐 global.json file path: ${globalJsonPath}`);
