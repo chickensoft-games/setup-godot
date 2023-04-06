@@ -36,7 +36,7 @@ async function run(platform: Platform): Promise<void> {
 
   // See if Godot version needs to be inferred from a global.json file.
   if (version.toLowerCase().includes('global')) {
-    const globalJsonPath = path.join(checkoutDirectory, 'global.json')
+    const globalJsonPath = path.join(checkoutDirectory, version)
     const hasGlobalJsonFile = fs.existsSync(globalJsonPath)
     core.info(`📢 Inferring Godot version from global.json file.`)
     core.info(`🌐 global.json file path: ${globalJsonPath}`)

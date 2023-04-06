@@ -1,0 +1,36 @@
+name: 📦 Release On Push
+on:
+  workflow_run:
+    workflows: ["test"]
+    branches:
+      - main
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      bump_version_scheme:
+        description: 'Bump version scheme (major, minor, patch)'
+        required: true
+        default: 'minor'
+        type: choice
+        options:
+          - 'major'
+          - 'minor'
+          - 'patch'
+
+jobs:
+  release-on-push:
+    name: 📦 Release On Push
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    env:
+      # Use a personal access token with push access to the repo.
+      # If you don't, pushing a release and tag will not cause subsequent
+      # workflows to run, like the update_major_version workflow.
+      GITHUB_TOKEN: ${{ secrets.GH_BASIC }}
+    steps:          
+      - name: 📦 Release On Push
+        uses: rymndhng/release-on-push-action@master
+        with:
+          # Use bump version given to us or fall back to `minor`.
+          bump_version_scheme: ${{ github.event.inputs.bump_version_scheme || 'patch' }}
