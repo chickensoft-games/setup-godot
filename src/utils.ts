@@ -108,7 +108,8 @@ interface SemanticVersion {
 }
 
 /** Godot download url prefix. */
-const GODOT_URL_PREFIX = 'https://downloads.tuxfamily.org/godotengine/'
+const GODOT_URL_PREFIX =
+  'https://github.com/godotengine/godot-builds/releases/download/'
 /** Godot filename prefix. */
 const GODOT_FILENAME_PREFIX = 'Godot_v'
 
@@ -156,12 +157,12 @@ export function getGodotUrl(
   if (patch !== '' && patch !== '0') {
     url += `.${patch}`
   }
-  url += '/'
-  if (label !== '') {
-    url += `${label}/`
-  }
 
-  if (useDotnet) url += `mono/`
+  if (label !== '') {
+    url += `-${label}/`
+  } else {
+    url += '-stable/'
+  }
 
   if (!isTemplate)
     return `${url}${getGodotFilename(version, platform, useDotnet)}.zip`
