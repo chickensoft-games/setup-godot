@@ -331,7 +331,7 @@ class MacOS {
 }
 exports.MacOS = MacOS;
 /** Godot download url prefix. */
-const GODOT_URL_PREFIX = 'https://downloads.tuxfamily.org/godotengine/';
+const GODOT_URL_PREFIX = 'https://github.com/godotengine/godot-builds/releases/download/';
 /** Godot filename prefix. */
 const GODOT_FILENAME_PREFIX = 'Godot_v';
 /**
@@ -369,12 +369,12 @@ function getGodotUrl(versionString, platform, useDotnet, isTemplate) {
     if (patch !== '' && patch !== '0') {
         url += `.${patch}`;
     }
-    url += '/';
     if (label !== '') {
-        url += `${label}/`;
+        url += `-${label}/`;
     }
-    if (useDotnet)
-        url += `mono/`;
+    else {
+        url += '-stable/';
+    }
     if (!isTemplate)
         return `${url}${getGodotFilename(version, platform, useDotnet)}.zip`;
     return `${url}${getGodotFilenameBase(version)}${useDotnet ? '_mono' : ''}_export_templates.tpz`;
