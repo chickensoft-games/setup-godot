@@ -212,11 +212,11 @@ function run(platform) {
             }
             core.endGroup();
             // Add environment variables
-            core.startGroup(`🔧 Adding environment variables...`);
-            core.exportVariable('GODOT', godotAlias);
-            core.info(`  GODOT=${godotAlias}`);
-            core.exportVariable('GODOT4', godotAlias);
-            core.info(`  GODOT4=${godotAlias}`);
+            core.startGroup(`🔧 Adding environment variables... - redirecting directly to godot Executable`);
+            core.exportVariable('GODOT', godotExecutable);
+            core.info(`  GODOT=${godotExecutable}`);
+            core.exportVariable('GODOT4', godotExecutable);
+            core.info(`  GODOT4=${godotExecutable}`);
             core.info(`✅ Environment variables added`);
             core.endGroup();
             core.info(`✅ Finished!`);
@@ -281,7 +281,7 @@ const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
 class Linux {
     constructor() {
-        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path.join(os.homedir(), '.local/share/godot');
+        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path.join(os.homedir(), '.local', 'share', 'godot');
     }
     godotFilenameSuffix(useDotnet) {
         if (useDotnet) {
@@ -299,7 +299,7 @@ class Linux {
 exports.Linux = Linux;
 class Windows {
     constructor() {
-        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path.normalize(path.join(os.homedir(), '\\AppData\\Roaming\\Godot'));
+        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path.normalize(path.join(os.homedir(), 'AppData', 'Roaming', 'Godot'));
     }
     godotFilenameSuffix(useDotnet) {
         if (useDotnet) {
@@ -317,7 +317,7 @@ class Windows {
 exports.Windows = Windows;
 class MacOS {
     constructor() {
-        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path.join(os.homedir(), '/Library/Application Support/Godot/');
+        this.GODOT_EXPORT_TEMPLATE_BASE_PATH = path.join(os.homedir(), 'Library', 'Application Support', 'Godot');
     }
     godotFilenameSuffix(useDotnet) {
         return `${useDotnet ? '_mono' : ''}_macos.universal`;
@@ -405,7 +405,9 @@ function getExportTemplatePath(versionString, platform, useDotnet) {
     }
     if (useDotnet)
         folderName += '.mono';
-    return (0, normalize_path_1.default)(path.join(platform.GODOT_EXPORT_TEMPLATE_BASE_PATH, version.major === '4' ? 'export_templates' : 'templates', folderName));
+    var exportTemplateFullPath = path.join(platform.GODOT_EXPORT_TEMPLATE_BASE_PATH, version.major === '4' ? 'export_templates' : 'templates', folderName);
+    var normalizedPath = (0, normalize_path_1.default)(exportTemplateFullPath);
+    return normalizedPath;
 }
 exports.getExportTemplatePath = getExportTemplatePath;
 function getGodotFilename(version, platform, useDotnet) {
