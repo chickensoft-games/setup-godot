@@ -263,10 +263,10 @@ async function run(platform: Platform): Promise<void> {
 
     // Add environment variables
     core.startGroup(`🔧 Adding environment variables...`)
-    core.exportVariable('GODOT', godotAlias)
-    core.info(`  GODOT=${godotAlias}`)
-    core.exportVariable('GODOT4', godotAlias)
-    core.info(`  GODOT4=${godotAlias}`)
+    core.exportVariable('GODOT', godotExecutable)
+    core.info(`  GODOT=${godotExecutable}`)
+    core.exportVariable('GODOT4', godotExecutable)
+    core.info(`  GODOT4=${godotExecutable}`)
     core.info(`✅ Environment variables added`)
     core.endGroup()
 
