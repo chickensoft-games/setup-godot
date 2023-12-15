@@ -8,6 +8,7 @@ import {
   getPlatform,
   parseVersion
 } from '../src/utils'
+import normalizePath from 'normalize-path'
 
 describe('parseVersion', () => {
   test('parses valid godot versions', () => {
@@ -172,116 +173,116 @@ describe('getExportTemplatePath', () => {
       expect(
         getExportTemplatePath('4.0.0-beta1', getPlatform('linux'), true)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          '.local/share/godot/export_templates',
+          '.local', 'share','godot','export_templates',
           '4.0.beta1.mono'
-        )
+        ))
       )
       expect(
         getExportTemplatePath('4.0.0-beta1', getPlatform('win32'), true)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          'AppData/Roaming/Godot/export_templates',
+          'AppData','Roaming','Godot','export_templates',
           '4.0.beta1.mono'
-        )
+        ))
       )
       expect(
         getExportTemplatePath('4.0.0-beta1', getPlatform('darwin'), true)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          '/Library/Application Support/Godot/export_templates',
+          'Library','Application Support','Godot','export_templates',
           '4.0.beta1.mono'
-        )
+        ))
       )
     })
     test('4.0.0', () => {
       expect(
         getExportTemplatePath('4.0.0', getPlatform('linux'), true)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          '.local/share/godot/export_templates',
+          '.local','share','godot','export_templates',
           '4.0.stable.mono'
-        )
+        ))
       )
       expect(
         getExportTemplatePath('4.0.0', getPlatform('win32'), true)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          'AppData/Roaming/Godot/export_templates',
+          'AppData','Roaming','Godot','export_templates',
           '4.0.stable.mono'
-        )
+        ))
       )
       expect(
         getExportTemplatePath('4.0.0', getPlatform('darwin'), true)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          '/Library/Application Support/Godot/export_templates',
+          'Library','Application Support','Godot','export_templates',
           '4.0.stable.mono'
-        )
+        ))
       )
     })
     test('3.5.1', () => {
       expect(
         getExportTemplatePath('3.5.1', getPlatform('linux'), true)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          '.local/share/godot/templates',
+          '.local','share','godot','templates',
           '3.5.1.stable.mono'
-        )
+        ))
       )
       expect(
         getExportTemplatePath('3.5.1', getPlatform('win32'), true)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          'AppData/Roaming/Godot/templates',
+          'AppData','Roaming','Godot','templates',
           '3.5.1.stable.mono'
-        )
+        ))
       )
       expect(
         getExportTemplatePath('3.5.1', getPlatform('darwin'), true)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          '/Library/Application Support/Godot/templates',
+          'Library','Application Support','Godot','templates',
           '3.5.1.stable.mono'
-        )
+        ))
       )
     })
     test('3.5.0', () => {
       expect(
         getExportTemplatePath('3.5.0', getPlatform('linux'), true)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          '.local/share/godot/templates',
+          '.local','share','godot','templates',
           '3.5.stable.mono'
-        )
+        ))
       )
       expect(
         getExportTemplatePath('3.5.0', getPlatform('win32'), true)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          'AppData/Roaming/Godot/templates',
+          'AppData','Roaming','Godot','templates',
           '3.5.stable.mono'
-        )
+        ))
       )
       expect(
         getExportTemplatePath('3.5.0', getPlatform('darwin'), true)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          '/Library/Application Support/Godot/templates',
+          'Library','Application Support','Godot','templates',
           '3.5.stable.mono'
-        )
+        ))
       )
     })
   })
@@ -291,104 +292,104 @@ describe('getExportTemplatePath', () => {
       expect(
         getExportTemplatePath('4.0.0-beta1', getPlatform('linux'), false)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          '.local/share/godot/export_templates',
+          '.local','share','godot','export_templates',
           '4.0.beta1'
-        )
+        ))
       )
       expect(
         getExportTemplatePath('4.0.0-beta1', getPlatform('win32'), false)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          'AppData/Roaming/Godot/export_templates',
+          'AppData','Roaming','Godot','export_templates',
           '4.0.beta1'
-        )
+        ))
       )
       expect(
         getExportTemplatePath('4.0.0-beta1', getPlatform('darwin'), false)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          '/Library/Application Support/Godot/export_templates',
+          'Library','Application Support','Godot','export_templates',
           '4.0.beta1'
-        )
+        ))
       )
     })
     test('4.0.0', () => {
       expect(
         getExportTemplatePath('4.0.0', getPlatform('linux'), false)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          '.local/share/godot/export_templates',
+          '.local','share','godot','export_templates',
           '4.0.stable'
-        )
+        ))
       )
       expect(
         getExportTemplatePath('4.0.0', getPlatform('win32'), false)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          'AppData/Roaming/Godot/export_templates',
+          'AppData','Roaming','Godot','export_templates',
           '4.0.stable'
-        )
+        ))
       )
       expect(
         getExportTemplatePath('4.0.0', getPlatform('darwin'), false)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          '/Library/Application Support/Godot/export_templates',
+          'Library','Application Support','Godot','export_templates',
           '4.0.stable'
-        )
+        ))
       )
     })
     test('3.5.1', () => {
       expect(
         getExportTemplatePath('3.5.1', getPlatform('linux'), false)
       ).toEqual(
-        path.join(os.homedir(), '.local/share/godot/templates', '3.5.1.stable')
+        normalizePath(path.join(os.homedir(), '.local','share','godot','templates', '3.5.1.stable'))
       )
       expect(
         getExportTemplatePath('3.5.1', getPlatform('win32'), false)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          'AppData/Roaming/Godot/templates',
+          'AppData','Roaming','Godot','templates',
           '3.5.1.stable'
-        )
+        ))
       )
       expect(
         getExportTemplatePath('3.5.1', getPlatform('darwin'), false)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          '/Library/Application Support/Godot/templates',
+          'Library','Application Support','Godot','templates',
           '3.5.1.stable'
-        )
+        ))
       )
     })
     test('3.5.0', () => {
       expect(
         getExportTemplatePath('3.5.0', getPlatform('linux'), false)
       ).toEqual(
-        path.join(os.homedir(), '.local/share/godot/templates', '3.5.stable')
+        normalizePath(path.join(os.homedir(), '.local','share','godot','templates', '3.5.stable'))
       )
       expect(
         getExportTemplatePath('3.5.0', getPlatform('win32'), false)
       ).toEqual(
-        path.join(os.homedir(), 'AppData/Roaming/Godot/templates', '3.5.stable')
+        normalizePath(path.join(os.homedir(), 'AppData','Roaming','Godot','templates', '3.5.stable'))
       )
       expect(
         getExportTemplatePath('3.5.0', getPlatform('darwin'), false)
       ).toEqual(
-        path.join(
+        normalizePath(path.join(
           os.homedir(),
-          '/Library/Application Support/Godot/templates',
+          'Library','Application Support','Godot','templates',
           '3.5.stable'
-        )
+        ))
       )
     })
   })
