@@ -1,6 +1,6 @@
 {
   "name": "setup-godot",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "Setup Godot for use with .NET on macOS, Windows, and Linux CI/CD runners.",
   "main": "lib/main.js",
