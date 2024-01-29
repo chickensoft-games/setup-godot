@@ -120,6 +120,10 @@ async function run(platform: Platform): Promise<void> {
       core.endGroup()
 
       core.startGroup(`📥 Downloading Godot to ${godotDownloadPath}...`)
+
+      // If the ZIP file still exists locally, delete it before downloading
+      if (fs.existsSync(godotDownloadPath)) fs.rmSync(godotDownloadPath)
+
       const godotDownloadedPath = await toolsCache.downloadTool(
         godotUrl,
         godotDownloadPath
@@ -130,6 +134,11 @@ async function run(platform: Platform): Promise<void> {
       core.startGroup(
         `📥 Downloading Export Templates to ${exportTemplateDownloadPath}...`
       )
+
+      // If the ZIP file still exists locally, delete it before downloading
+      if (fs.existsSync(exportTemplateDownloadPath))
+        fs.rmSync(exportTemplateDownloadPath)
+
       const templateDownloadedPath = await toolsCache.downloadTool(
         exportTemplateUrl,
         exportTemplateDownloadPath

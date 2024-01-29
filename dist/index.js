@@ -125,10 +125,16 @@ function run(platform) {
                 core.info(`🙃 Previous Godot download not found in cache`);
                 core.endGroup();
                 core.startGroup(`📥 Downloading Godot to ${godotDownloadPath}...`);
+                // If the ZIP file still exists locally, delete it before downloading
+                if (fs.existsSync(godotDownloadPath))
+                    fs.rmSync(godotDownloadPath);
                 const godotDownloadedPath = yield toolsCache.downloadTool(godotUrl, godotDownloadPath);
                 core.info(`✅ Godot downloaded to ${godotDownloadedPath}`);
                 core.endGroup();
                 core.startGroup(`📥 Downloading Export Templates to ${exportTemplateDownloadPath}...`);
+                // If the ZIP file still exists locally, delete it before downloading
+                if (fs.existsSync(exportTemplateDownloadPath))
+                    fs.rmSync(exportTemplateDownloadPath);
                 const templateDownloadedPath = yield toolsCache.downloadTool(exportTemplateUrl, exportTemplateDownloadPath);
                 core.info(`✅ Export Templates downloaded to ${templateDownloadedPath}`);
                 core.endGroup();
