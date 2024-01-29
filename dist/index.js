@@ -207,12 +207,18 @@ function run(platform) {
             // Create symlink to Godot executable
             const godotAlias = path_1.default.join(binDir, 'godot');
             core.startGroup(`🔗 Creating symlinks to executables...`);
+            // If an alias already exists, remove it before creating the new alias
+            if (fs.existsSync(godotAlias))
+                fs.unlinkSync(godotAlias);
             fs.linkSync(godotExecutable, godotAlias);
             core.info(`✅ Symlink to Godot created`);
             const godotSharpDirAlias = path_1.default.join(binDir, 'GodotSharp');
             if (useDotnet) {
                 // Create symlink to GodotSharp directory
                 const godotSharpDir = path_1.default.join(path_1.default.dirname(godotSharp), '../..');
+                // If an alias already exists, remove it before creating the new alias
+                if (fs.existsSync(godotSharpDirAlias))
+                    fs.unlinkSync(godotSharpDirAlias);
                 fs.symlinkSync(godotSharpDir, godotSharpDirAlias);
                 core.info(`✅ Symlink to GodotSharp created at ${godotSharpDirAlias}`);
             }
