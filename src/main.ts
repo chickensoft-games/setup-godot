@@ -148,6 +148,10 @@ async function run(platform: Platform): Promise<void> {
 
       // Extract Godot
       core.startGroup(`📦 Extracting Godot to ${installationDir}...`)
+
+      // If the export template folder already exists, remove it before extracting the ZIP file. This will "uninstall" other installations (e.g. on version changes).
+      if (fs.existsSync(installationDir)) fs.rmdirSync(installationDir)
+
       const godotExtractedPath = await toolsCache.extractZip(
         godotDownloadedPath,
         installationDir
@@ -168,6 +172,10 @@ async function run(platform: Platform): Promise<void> {
       core.startGroup(
         `📦 Extracting Export Templates to ${exportTemplatePath}...`
       )
+
+      // If the export template folder already exists, remove it before extracting the ZIP file. This will "uninstall" other installations (e.g. on version changes).
+      if (fs.existsSync(exportTemplatePath)) fs.rmdirSync(exportTemplatePath)
+
       const exportTemplateExtractedPath = await toolsCache.extractZip(
         templateDownloadedPath,
         path.dirname(exportTemplatePath)
