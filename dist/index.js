@@ -142,7 +142,7 @@ function run(platform) {
                 core.startGroup(`📦 Extracting Godot to ${installationDir}...`);
                 // If the export template folder already exists, remove it before extracting the ZIP file. This will "uninstall" other installations (e.g. on version changes).
                 if (fs.existsSync(installationDir))
-                    fs.rmdirSync(installationDir);
+                    fs.rmdirSync(installationDir, { recursive: true });
                 const godotExtractedPath = yield toolsCache.extractZip(godotDownloadedPath, installationDir);
                 core.info(`✅ Godot extracted to ${godotExtractedPath}`);
                 core.endGroup();
@@ -154,7 +154,7 @@ function run(platform) {
                 core.startGroup(`📦 Extracting Export Templates to ${exportTemplatePath}...`);
                 // If the export template folder already exists, remove it before extracting the ZIP file. This will "uninstall" other installations (e.g. on version changes).
                 if (fs.existsSync(exportTemplatePath))
-                    fs.rmdirSync(exportTemplatePath);
+                    fs.rmdirSync(exportTemplatePath, { recursive: true });
                 const exportTemplateExtractedPath = yield toolsCache.extractZip(templateDownloadedPath, path_1.default.dirname(exportTemplatePath));
                 core.info(`✅ Export Templates extracted to ${exportTemplateExtractedPath}`);
                 fs.renameSync(path_1.default.join(exportTemplateExtractedPath, 'templates'), exportTemplatePath);
