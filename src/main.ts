@@ -270,8 +270,11 @@ async function run(platform: Platform): Promise<void> {
     const godotAlias = path.join(binDir, 'godot')
     core.startGroup(`🔗 Creating symlinks to executables...`)
 
-    // If an alias already exists, remove it before creating the new alias
-    if (fs.existsSync(binDir)) fs.rmSync(binDir, {recursive: true, force: true})
+    // If an alias already exists, clear it before creating the new alias
+    if (fs.existsSync(binDir)) {
+      fs.rmSync(binDir, {recursive: true, force: true})
+      fs.mkdirSync(binDir, {recursive: true})
+    }
 
     fs.linkSync(godotExecutable, godotAlias)
     core.info(`✅ Symlink to Godot created`)
