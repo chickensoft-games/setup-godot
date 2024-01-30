@@ -120,6 +120,10 @@ async function run(platform: Platform): Promise<void> {
       core.endGroup()
 
       core.startGroup(`📥 Downloading Godot to ${godotDownloadPath}...`)
+
+      // If the ZIP file already exists locally, delete it before downloading
+      if (fs.existsSync(godotDownloadPath)) fs.rmSync(godotDownloadPath)
+
       const godotDownloadedPath = await toolsCache.downloadTool(
         godotUrl,
         godotDownloadPath
@@ -130,6 +134,11 @@ async function run(platform: Platform): Promise<void> {
       core.startGroup(
         `📥 Downloading Export Templates to ${exportTemplateDownloadPath}...`
       )
+
+      // If the ZIP file already exists locally, delete it before downloading
+      if (fs.existsSync(exportTemplateDownloadPath))
+        fs.rmSync(exportTemplateDownloadPath)
+
       const templateDownloadedPath = await toolsCache.downloadTool(
         exportTemplateUrl,
         exportTemplateDownloadPath
@@ -139,6 +148,11 @@ async function run(platform: Platform): Promise<void> {
 
       // Extract Godot
       core.startGroup(`📦 Extracting Godot to ${installationDir}...`)
+
+      // If the godot installation folder already exists, remove it before extracting the ZIP file. This will "uninstall" other installations (e.g. on version changes).
+      if (fs.existsSync(installationDir))
+        fs.rmdirSync(installationDir, {recursive: true})
+
       const godotExtractedPath = await toolsCache.extractZip(
         godotDownloadedPath,
         installationDir
@@ -159,6 +173,11 @@ async function run(platform: Platform): Promise<void> {
       core.startGroup(
         `📦 Extracting Export Templates to ${exportTemplatePath}...`
       )
+
+      // If the export template folder already exists, remove it before extracting the ZIP file. This will "uninstall" other installations (e.g. on version changes).
+      if (fs.existsSync(exportTemplatePath))
+        fs.rmdirSync(exportTemplatePath, {recursive: true})
+
       const exportTemplateExtractedPath = await toolsCache.extractZip(
         templateDownloadedPath,
         path.dirname(exportTemplatePath)
@@ -250,6 +269,13 @@ async function run(platform: Platform): Promise<void> {
     // Create symlink to Godot executable
     const godotAlias = path.join(binDir, 'godot')
     core.startGroup(`🔗 Creating symlinks to executables...`)
+
+    // If an alias already exists, clear the bin folder before creating the new alias
+    if (fs.existsSync(binDir)) {
+      fs.rmSync(binDir, {recursive: true, force: true})
+      fs.mkdirSync(binDir, {recursive: true})
+    }
+
     fs.linkSync(godotExecutable, godotAlias)
     core.info(`✅ Symlink to Godot created`)
     const godotSharpDirAlias = path.join(binDir, 'GodotSharp')
