@@ -125,14 +125,14 @@ function run(platform) {
                 core.info(`🙃 Previous Godot download not found in cache`);
                 core.endGroup();
                 core.startGroup(`📥 Downloading Godot to ${godotDownloadPath}...`);
-                // If the ZIP file still exists locally, delete it before downloading
+                // If the ZIP file already exists locally, delete it before downloading
                 if (fs.existsSync(godotDownloadPath))
                     fs.rmSync(godotDownloadPath);
                 const godotDownloadedPath = yield toolsCache.downloadTool(godotUrl, godotDownloadPath);
                 core.info(`✅ Godot downloaded to ${godotDownloadedPath}`);
                 core.endGroup();
                 core.startGroup(`📥 Downloading Export Templates to ${exportTemplateDownloadPath}...`);
-                // If the ZIP file still exists locally, delete it before downloading
+                // If the ZIP file already exists locally, delete it before downloading
                 if (fs.existsSync(exportTemplateDownloadPath))
                     fs.rmSync(exportTemplateDownloadPath);
                 const templateDownloadedPath = yield toolsCache.downloadTool(exportTemplateUrl, exportTemplateDownloadPath);
@@ -140,7 +140,7 @@ function run(platform) {
                 core.endGroup();
                 // Extract Godot
                 core.startGroup(`📦 Extracting Godot to ${installationDir}...`);
-                // If the export template folder already exists, remove it before extracting the ZIP file. This will "uninstall" other installations (e.g. on version changes).
+                // If the godot installation folder already exists, remove it before extracting the ZIP file. This will "uninstall" other installations (e.g. on version changes).
                 if (fs.existsSync(installationDir))
                     fs.rmdirSync(installationDir, { recursive: true });
                 const godotExtractedPath = yield toolsCache.extractZip(godotDownloadedPath, installationDir);
@@ -213,7 +213,7 @@ function run(platform) {
             // Create symlink to Godot executable
             const godotAlias = path_1.default.join(binDir, 'godot');
             core.startGroup(`🔗 Creating symlinks to executables...`);
-            // If an alias already exists, clear it before creating the new alias
+            // If an alias already exists, clear the bin folder before creating the new alias
             if (fs.existsSync(binDir)) {
                 fs.rmSync(binDir, { recursive: true, force: true });
                 fs.mkdirSync(binDir, { recursive: true });
