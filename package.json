@@ -30,7 +30,7 @@
     "@actions/cache": "^3.2.2",
     "@actions/core": "^1.10.0",
     "@actions/tool-cache": "^2.0.1",
-    "@types/normalize-path": "^3.0.0",
+    "@types/normalize-path": "^3.0.2",
     "normalize-path": "^3.0.0"
   },
   "devDependencies": {
