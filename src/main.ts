@@ -25,6 +25,7 @@ async function run(platform: Platform): Promise<void> {
   const binRelativePath = core.getInput('bin-path').replace(/\s/g, '')
   const godotSharpRelease = core.getBooleanInput('godot-sharp-release')
   const checkoutDirectory = process.env['GITHUB_WORKSPACE'] ?? ''
+  const includeTemplates = core.getBooleanInput('include-templates')
 
   const userDir = os.homedir()
   const downloadsDir = path.join(userDir, downloadsRelativePath)
@@ -74,12 +75,12 @@ async function run(platform: Platform): Promise<void> {
   )
   const binDir = path.join(userDir, binRelativePath)
 
-  const exportTemplateUrl = getGodotUrl(version, platform, useDotnet, true)
-  const exportTemplatePath = getExportTemplatePath(version, platform, useDotnet)
-  const exportTemplateDownloadPath = path.join(
+  const exportTemplateUrl = includeTemplates ? getGodotUrl(version, platform, useDotnet, true) : ''
+  const exportTemplatePath = includeTemplates ? getExportTemplatePath(version, platform, useDotnet) : ''
+  const exportTemplateDownloadPath = includeTemplates ? path.join(
     downloadsDir,
     'export_templates.zip'
-  )
+  ) : ''
 
   core.info(`🤖 Godot version: ${version}`)
   core.info(`🤖 Godot version name: ${versionName}`)
@@ -90,9 +91,15 @@ async function run(platform: Platform): Promise<void> {
   core.info(`📥 Godot download path: ${godotDownloadPath}`)
   core.info(`📦 Godot installation directory: ${installationDir}`)
   core.info(`🤖 Godot installation path: ${godotInstallationPath}`)
-  core.info(`🤖 Export Template url: ${exportTemplateUrl}`)
-  core.info(`📥 Export Template download path: ${exportTemplateDownloadPath}`)
-  core.info(`🤖 Export Template Path: ${exportTemplatePath}`)
+  
+  if (includeTemplates) {
+    core.info(`🤖 Export Template url: ${exportTemplateUrl}`)
+    core.info(`📥 Export Template download path: ${exportTemplateDownloadPath}`)
+    core.info(`🤖 Export Template Path: ${exportTemplatePath}`)
+  } else {
+    core.info(`⏭️ Skipping Export Templates.`)
+  }
+  
   core.info(`📂 Bin directory: ${binDir}`)
   core.info(`🤖 GodotSharp release: ${godotSharpRelease}`)
   core.endGroup()
@@ -108,9 +115,12 @@ async function run(platform: Platform): Promise<void> {
 
     // See if Godot is already installed.
     core.startGroup(`🤔 Checking if Godot is already in cache...`)
+    
+    const cachedPaths = includeTemplates ? [ godotInstallationPath, exportTemplatePath] : [ godotInstallationPath ]
+    const cacheKey = includeTemplates ? godotUrl : godotUrl + '-no-templates'
     const cached = await cache.restoreCache(
-      [godotInstallationPath, exportTemplatePath],
-      godotUrl
+      cachedPaths.slice(),
+      cacheKey
     )
 
     let executables: string[]
@@ -131,20 +141,6 @@ async function run(platform: Platform): Promise<void> {
       core.info(`✅ Godot downloaded to ${godotDownloadedPath}`)
       core.endGroup()
 
-      core.startGroup(
-        `📥 Downloading Export Templates to ${exportTemplateDownloadPath}...`
-      )
-
-      // If the ZIP file already exists locally, delete it before downloading
-      if (fs.existsSync(exportTemplateDownloadPath))
-        fs.rmSync(exportTemplateDownloadPath)
-
-      const templateDownloadedPath = await toolsCache.downloadTool(
-        exportTemplateUrl,
-        exportTemplateDownloadPath
-      )
-      core.info(`✅ Export Templates downloaded to ${templateDownloadedPath}`)
-      core.endGroup()
 
       // Extract Godot
       core.startGroup(`📦 Extracting Godot to ${installationDir}...`)
@@ -170,44 +166,63 @@ async function run(platform: Platform): Promise<void> {
       core.info(`✅ Files shown`)
       core.endGroup()
 
-      core.startGroup(
-        `📦 Extracting Export Templates to ${exportTemplatePath}...`
-      )
 
-      // If the export template folder already exists, remove it before extracting the ZIP file. This will "uninstall" other installations (e.g. on version changes).
-      if (fs.existsSync(exportTemplatePath))
-        fs.rmdirSync(exportTemplatePath, {recursive: true})
+      if (includeTemplates) {
+        core.startGroup(
+          `📥 Downloading Export Templates to ${exportTemplateDownloadPath}...`
+        )
 
-      const exportTemplateExtractedPath = await toolsCache.extractZip(
-        templateDownloadedPath,
-        path.dirname(exportTemplatePath)
-      )
-      core.info(
-        `✅ Export Templates extracted to ${exportTemplateExtractedPath}`
-      )
-      fs.renameSync(
-        path.join(exportTemplateExtractedPath, 'templates'),
-        exportTemplatePath
-      )
-      core.info(
-        `✅ ${path.join(
-          path.dirname(exportTemplateExtractedPath),
-          'templates'
-        )} moved to ${exportTemplatePath}`
-      )
-      core.endGroup()
+        // If the ZIP file already exists locally, delete it before downloading
+        if (fs.existsSync(exportTemplateDownloadPath))
+          fs.rmSync(exportTemplateDownloadPath)
 
-      // Show extracted Export Template files recursively
-      core.startGroup(`📄 Showing extracted files recursively...`)
-      await findExecutablesRecursively(platform, exportTemplatePath, '')
-      core.info(`✅ Files shown`)
-      core.endGroup()
+        const templateDownloadedPath = await toolsCache.downloadTool(
+          exportTemplateUrl,
+          exportTemplateDownloadPath
+        )
+        core.info(`✅ Export Templates downloaded to ${templateDownloadedPath}`)
+        core.endGroup()
+
+
+        core.startGroup(
+          `📦 Extracting Export Templates to ${exportTemplatePath}...`
+        )
+
+        // If the export template folder already exists, remove it before extracting the ZIP file. This will "uninstall" other installations (e.g. on version changes).
+        if (fs.existsSync(exportTemplatePath))
+          fs.rmdirSync(exportTemplatePath, {recursive: true})
+
+        const exportTemplateExtractedPath = await toolsCache.extractZip(
+          templateDownloadedPath,
+          path.dirname(exportTemplatePath)
+        )
+        core.info(
+          `✅ Export Templates extracted to ${exportTemplateExtractedPath}`
+        )
+        fs.renameSync(
+          path.join(exportTemplateExtractedPath, 'templates'),
+          exportTemplatePath
+        )
+        core.info(
+          `✅ ${path.join(
+            path.dirname(exportTemplateExtractedPath),
+            'templates'
+          )} moved to ${exportTemplatePath}`
+        )
+        core.endGroup()
+
+        // Show extracted Export Template files recursively
+        core.startGroup(`📄 Showing extracted files recursively...`)
+        await findExecutablesRecursively(platform, exportTemplatePath, '')
+        core.info(`✅ Files shown`)
+        core.endGroup()
+      }
 
       // Save extracted Godot contents to cache
       core.startGroup(`💾 Saving extracted Godot download to cache...`)
       await cache.saveCache(
-        [godotInstallationPath, exportTemplatePath],
-        godotUrl
+        cachedPaths,
+        cacheKey
       )
       core.info(`✅ Godot saved to cache`)
       core.endGroup()
@@ -221,7 +236,6 @@ async function run(platform: Platform): Promise<void> {
         installationDir,
         ''
       )
-      await findExecutablesRecursively(platform, exportTemplatePath, '')
       core.info(`✅ Files shown`)
       core.endGroup()
     }

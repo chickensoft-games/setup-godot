@@ -61,7 +61,11 @@ inputs:
   use-dotnet:
     description: >-
       True to use the .NET-enabled version of Godot that enables C#, false to use the default version.
-    default: 'true'
+    default: true
+  include-templates:
+    description: >-
+      True will also download the Godot Export Templates for each platform.
+    default: false
 runs:
   using: 'node16'
   main: 'dist/index.js'
