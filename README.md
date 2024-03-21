@@ -5,7 +5,7 @@
 Setup Godot for use with (or without) .NET on macOS, Windows, and Linux CI/CD runners.
 
 - ✅ Installs Godot 4.x
-- ✅ Installs export templates.
+- ✅ Optionally installs export templates.
 - ✅ C# supported using .NET version of Godot.
 - ✅ Versions **without** .NET are also supported.
 - ✅ Installs Godot directly on the CI/CD runner.
@@ -63,6 +63,8 @@ jobs:
           version: 4.0.0-beta16 # also valid: 4.0.0.rc1 or 4.0.0, etc
           # Use .NET-enabled version of Godot (the default is also true).
           use-dotnet: true
+          # Include the Godot Export Templtes (the default is false).
+          include-templates: true
 
       - name: 🔬 Verify Setup
         run: |

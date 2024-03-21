@@ -62,6 +62,7 @@ function run(platform) {
         const binRelativePath = core.getInput('bin-path').replace(/\s/g, '');
         const godotSharpRelease = core.getBooleanInput('godot-sharp-release');
         const checkoutDirectory = (_a = process.env['GITHUB_WORKSPACE']) !== null && _a !== void 0 ? _a : '';
+        const includeTemplates = core.getBooleanInput('include-templates');
         const userDir = os.homedir();
         const downloadsDir = path_1.default.join(userDir, downloadsRelativePath);
         const installationDir = path_1.default.join(userDir, pathRelative);
@@ -90,9 +91,9 @@ function run(platform) {
         const godotDownloadPath = path_1.default.join(downloadsDir, `${versionName}.zip`);
         const godotInstallationPath = platform.getUnzippedPath(installationDir, versionName, useDotnet);
         const binDir = path_1.default.join(userDir, binRelativePath);
-        const exportTemplateUrl = (0, utils_1.getGodotUrl)(version, platform, useDotnet, true);
-        const exportTemplatePath = (0, utils_1.getExportTemplatePath)(version, platform, useDotnet);
-        const exportTemplateDownloadPath = path_1.default.join(downloadsDir, 'export_templates.zip');
+        const exportTemplateUrl = includeTemplates ? (0, utils_1.getGodotUrl)(version, platform, useDotnet, true) : '';
+        const exportTemplatePath = includeTemplates ? (0, utils_1.getExportTemplatePath)(version, platform, useDotnet) : '';
+        const exportTemplateDownloadPath = includeTemplates ? path_1.default.join(downloadsDir, 'export_templates.zip') : '';
         core.info(`🤖 Godot version: ${version}`);
         core.info(`🤖 Godot version name: ${versionName}`);
         core.info(`🟣 Use .NET: ${useDotnet}`);
@@ -102,9 +103,14 @@ function run(platform) {
         core.info(`📥 Godot download path: ${godotDownloadPath}`);
         core.info(`📦 Godot installation directory: ${installationDir}`);
         core.info(`🤖 Godot installation path: ${godotInstallationPath}`);
-        core.info(`🤖 Export Template url: ${exportTemplateUrl}`);
-        core.info(`📥 Export Template download path: ${exportTemplateDownloadPath}`);
-        core.info(`🤖 Export Template Path: ${exportTemplatePath}`);
+        if (includeTemplates) {
+            core.info(`🤖 Export Template url: ${exportTemplateUrl}`);
+            core.info(`📥 Export Template download path: ${exportTemplateDownloadPath}`);
+            core.info(`🤖 Export Template Path: ${exportTemplatePath}`);
+        }
+        else {
+            core.info(`⏭️ Skipping Export Templates.`);
+        }
         core.info(`📂 Bin directory: ${binDir}`);
         core.info(`🤖 GodotSharp release: ${godotSharpRelease}`);
         core.endGroup();
@@ -118,7 +124,9 @@ function run(platform) {
             core.endGroup();
             // See if Godot is already installed.
             core.startGroup(`🤔 Checking if Godot is already in cache...`);
-            const cached = yield cache.restoreCache([godotInstallationPath, exportTemplatePath], godotUrl);
+            const cachedPaths = includeTemplates ? [godotInstallationPath, exportTemplatePath] : [godotInstallationPath];
+            const cacheKey = includeTemplates ? godotUrl : godotUrl + '-no-templates';
+            const cached = yield cache.restoreCache(cachedPaths.slice(), cacheKey);
             let executables;
             if (!cached) {
                 // Download Godot
@@ -130,13 +138,6 @@ function run(platform) {
                     fs.rmSync(godotDownloadPath);
                 const godotDownloadedPath = yield toolsCache.downloadTool(godotUrl, godotDownloadPath);
                 core.info(`✅ Godot downloaded to ${godotDownloadedPath}`);
-                core.endGroup();
-                core.startGroup(`📥 Downloading Export Templates to ${exportTemplateDownloadPath}...`);
-                // If the ZIP file already exists locally, delete it before downloading
-                if (fs.existsSync(exportTemplateDownloadPath))
-                    fs.rmSync(exportTemplateDownloadPath);
-                const templateDownloadedPath = yield toolsCache.downloadTool(exportTemplateUrl, exportTemplateDownloadPath);
-                core.info(`✅ Export Templates downloaded to ${templateDownloadedPath}`);
                 core.endGroup();
                 // Extract Godot
                 core.startGroup(`📦 Extracting Godot to ${installationDir}...`);
@@ -151,23 +152,32 @@ function run(platform) {
                 executables = yield (0, utils_1.findExecutablesRecursively)(platform, installationDir, '');
                 core.info(`✅ Files shown`);
                 core.endGroup();
-                core.startGroup(`📦 Extracting Export Templates to ${exportTemplatePath}...`);
-                // If the export template folder already exists, remove it before extracting the ZIP file. This will "uninstall" other installations (e.g. on version changes).
-                if (fs.existsSync(exportTemplatePath))
-                    fs.rmdirSync(exportTemplatePath, { recursive: true });
-                const exportTemplateExtractedPath = yield toolsCache.extractZip(templateDownloadedPath, path_1.default.dirname(exportTemplatePath));
-                core.info(`✅ Export Templates extracted to ${exportTemplateExtractedPath}`);
-                fs.renameSync(path_1.default.join(exportTemplateExtractedPath, 'templates'), exportTemplatePath);
-                core.info(`✅ ${path_1.default.join(path_1.default.dirname(exportTemplateExtractedPath), 'templates')} moved to ${exportTemplatePath}`);
-                core.endGroup();
-                // Show extracted Export Template files recursively
-                core.startGroup(`📄 Showing extracted files recursively...`);
-                yield (0, utils_1.findExecutablesRecursively)(platform, exportTemplatePath, '');
-                core.info(`✅ Files shown`);
-                core.endGroup();
+                if (includeTemplates) {
+                    core.startGroup(`📥 Downloading Export Templates to ${exportTemplateDownloadPath}...`);
+                    // If the ZIP file already exists locally, delete it before downloading
+                    if (fs.existsSync(exportTemplateDownloadPath))
+                        fs.rmSync(exportTemplateDownloadPath);
+                    const templateDownloadedPath = yield toolsCache.downloadTool(exportTemplateUrl, exportTemplateDownloadPath);
+                    core.info(`✅ Export Templates downloaded to ${templateDownloadedPath}`);
+                    core.endGroup();
+                    core.startGroup(`📦 Extracting Export Templates to ${exportTemplatePath}...`);
+                    // If the export template folder already exists, remove it before extracting the ZIP file. This will "uninstall" other installations (e.g. on version changes).
+                    if (fs.existsSync(exportTemplatePath))
+                        fs.rmdirSync(exportTemplatePath, { recursive: true });
+                    const exportTemplateExtractedPath = yield toolsCache.extractZip(templateDownloadedPath, path_1.default.dirname(exportTemplatePath));
+                    core.info(`✅ Export Templates extracted to ${exportTemplateExtractedPath}`);
+                    fs.renameSync(path_1.default.join(exportTemplateExtractedPath, 'templates'), exportTemplatePath);
+                    core.info(`✅ ${path_1.default.join(path_1.default.dirname(exportTemplateExtractedPath), 'templates')} moved to ${exportTemplatePath}`);
+                    core.endGroup();
+                    // Show extracted Export Template files recursively
+                    core.startGroup(`📄 Showing extracted files recursively...`);
+                    yield (0, utils_1.findExecutablesRecursively)(platform, exportTemplatePath, '');
+                    core.info(`✅ Files shown`);
+                    core.endGroup();
+                }
                 // Save extracted Godot contents to cache
                 core.startGroup(`💾 Saving extracted Godot download to cache...`);
-                yield cache.saveCache([godotInstallationPath, exportTemplatePath], godotUrl);
+                yield cache.saveCache(cachedPaths, cacheKey);
                 core.info(`✅ Godot saved to cache`);
                 core.endGroup();
             }
@@ -176,7 +186,6 @@ function run(platform) {
                 core.endGroup();
                 core.startGroup(`📄 Showing cached files recursively...`);
                 executables = yield (0, utils_1.findExecutablesRecursively)(platform, installationDir, '');
-                yield (0, utils_1.findExecutablesRecursively)(platform, exportTemplatePath, '');
                 core.info(`✅ Files shown`);
                 core.endGroup();
             }
