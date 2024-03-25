@@ -67,5 +67,5 @@ inputs:
       True will also download the Godot Export Templates for each platform.
     default: false
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
