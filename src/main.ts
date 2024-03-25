@@ -75,12 +75,15 @@ async function run(platform: Platform): Promise<void> {
   )
   const binDir = path.join(userDir, binRelativePath)
 
-  const exportTemplateUrl = includeTemplates ? getGodotUrl(version, platform, useDotnet, true) : ''
-  const exportTemplatePath = includeTemplates ? getExportTemplatePath(version, platform, useDotnet) : ''
-  const exportTemplateDownloadPath = includeTemplates ? path.join(
-    downloadsDir,
-    'export_templates.zip'
-  ) : ''
+  const exportTemplateUrl = includeTemplates
+    ? getGodotUrl(version, platform, useDotnet, true)
+    : ''
+  const exportTemplatePath = includeTemplates
+    ? getExportTemplatePath(version, platform, useDotnet)
+    : ''
+  const exportTemplateDownloadPath = includeTemplates
+    ? path.join(downloadsDir, 'export_templates.zip')
+    : ''
 
   core.info(`🤖 Godot version: ${version}`)
   core.info(`🤖 Godot version name: ${versionName}`)
@@ -91,7 +94,7 @@ async function run(platform: Platform): Promise<void> {
   core.info(`📥 Godot download path: ${godotDownloadPath}`)
   core.info(`📦 Godot installation directory: ${installationDir}`)
   core.info(`🤖 Godot installation path: ${godotInstallationPath}`)
-  
+
   if (includeTemplates) {
     core.info(`🤖 Export Template url: ${exportTemplateUrl}`)
     core.info(`📥 Export Template download path: ${exportTemplateDownloadPath}`)
@@ -99,7 +102,7 @@ async function run(platform: Platform): Promise<void> {
   } else {
     core.info(`⏭️ Skipping Export Templates.`)
   }
-  
+
   core.info(`📂 Bin directory: ${binDir}`)
   core.info(`🤖 GodotSharp release: ${godotSharpRelease}`)
   core.endGroup()
@@ -115,13 +118,12 @@ async function run(platform: Platform): Promise<void> {
 
     // See if Godot is already installed.
     core.startGroup(`🤔 Checking if Godot is already in cache...`)
-    
-    const cachedPaths = includeTemplates ? [ godotInstallationPath, exportTemplatePath] : [ godotInstallationPath ]
-    const cacheKey = includeTemplates ? godotUrl : godotUrl + '-no-templates'
-    const cached = await cache.restoreCache(
-      cachedPaths.slice(),
-      cacheKey
-    )
+
+    const cachedPaths = includeTemplates
+      ? [godotInstallationPath, exportTemplatePath]
+      : [godotInstallationPath]
+    const cacheKey = includeTemplates ? godotUrl : `${godotUrl}-no-templates`
+    const cached = await cache.restoreCache(cachedPaths.slice(), cacheKey)
 
     let executables: string[]
     if (!cached) {
@@ -140,7 +142,6 @@ async function run(platform: Platform): Promise<void> {
       )
       core.info(`✅ Godot downloaded to ${godotDownloadedPath}`)
       core.endGroup()
-
 
       // Extract Godot
       core.startGroup(`📦 Extracting Godot to ${installationDir}...`)
@@ -166,7 +167,6 @@ async function run(platform: Platform): Promise<void> {
       core.info(`✅ Files shown`)
       core.endGroup()
 
-
       if (includeTemplates) {
         core.startGroup(
           `📥 Downloading Export Templates to ${exportTemplateDownloadPath}...`
@@ -182,7 +182,6 @@ async function run(platform: Platform): Promise<void> {
         )
         core.info(`✅ Export Templates downloaded to ${templateDownloadedPath}`)
         core.endGroup()
-
 
         core.startGroup(
           `📦 Extracting Export Templates to ${exportTemplatePath}...`
@@ -220,10 +219,7 @@ async function run(platform: Platform): Promise<void> {
 
       // Save extracted Godot contents to cache
       core.startGroup(`💾 Saving extracted Godot download to cache...`)
-      await cache.saveCache(
-        cachedPaths,
-        cacheKey
-      )
+      await cache.saveCache(cachedPaths, cacheKey)
       core.info(`✅ Godot saved to cache`)
       core.endGroup()
     } else {
