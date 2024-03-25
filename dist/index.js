@@ -91,9 +91,15 @@ function run(platform) {
         const godotDownloadPath = path_1.default.join(downloadsDir, `${versionName}.zip`);
         const godotInstallationPath = platform.getUnzippedPath(installationDir, versionName, useDotnet);
         const binDir = path_1.default.join(userDir, binRelativePath);
-        const exportTemplateUrl = includeTemplates ? (0, utils_1.getGodotUrl)(version, platform, useDotnet, true) : '';
-        const exportTemplatePath = includeTemplates ? (0, utils_1.getExportTemplatePath)(version, platform, useDotnet) : '';
-        const exportTemplateDownloadPath = includeTemplates ? path_1.default.join(downloadsDir, 'export_templates.zip') : '';
+        const exportTemplateUrl = includeTemplates
+            ? (0, utils_1.getGodotUrl)(version, platform, useDotnet, true)
+            : '';
+        const exportTemplatePath = includeTemplates
+            ? (0, utils_1.getExportTemplatePath)(version, platform, useDotnet)
+            : '';
+        const exportTemplateDownloadPath = includeTemplates
+            ? path_1.default.join(downloadsDir, 'export_templates.zip')
+            : '';
         core.info(`🤖 Godot version: ${version}`);
         core.info(`🤖 Godot version name: ${versionName}`);
         core.info(`🟣 Use .NET: ${useDotnet}`);
@@ -124,8 +130,10 @@ function run(platform) {
             core.endGroup();
             // See if Godot is already installed.
             core.startGroup(`🤔 Checking if Godot is already in cache...`);
-            const cachedPaths = includeTemplates ? [godotInstallationPath, exportTemplatePath] : [godotInstallationPath];
-            const cacheKey = includeTemplates ? godotUrl : godotUrl + '-no-templates';
+            const cachedPaths = includeTemplates
+                ? [godotInstallationPath, exportTemplatePath]
+                : [godotInstallationPath];
+            const cacheKey = includeTemplates ? godotUrl : `${godotUrl}-no-templates`;
             const cached = yield cache.restoreCache(cachedPaths.slice(), cacheKey);
             let executables;
             if (!cached) {
@@ -2976,7 +2984,7 @@ class OidcClient {
                 .catch(error => {
                 throw new Error(`Failed to get ID Token. \n 
         Error Code : ${error.statusCode}\n 
-        Error Message: ${error.result.message}`);
+        Error Message: ${error.message}`);
             });
             const id_token = (_a = res.result) === null || _a === void 0 ? void 0 : _a.value;
             if (!id_token) {
