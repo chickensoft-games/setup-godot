@@ -66,6 +66,10 @@ inputs:
     description: >-
       True will also download the Godot Export Templates for each platform.
     default: false
+  cache:
+    description: >-
+      True to cache downloads.
+    default: true
 runs:
   using: 'node20'
   main: 'dist/index.js'
