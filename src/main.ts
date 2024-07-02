@@ -26,6 +26,7 @@ async function run(platform: Platform): Promise<void> {
   const godotSharpRelease = core.getBooleanInput('godot-sharp-release')
   const checkoutDirectory = process.env['GITHUB_WORKSPACE'] ?? ''
   const includeTemplates = core.getBooleanInput('include-templates')
+  const useCache = core.getBooleanInput('cache')
 
   const userDir = os.homedir()
   const downloadsDir = path.join(userDir, downloadsRelativePath)
@@ -123,7 +124,13 @@ async function run(platform: Platform): Promise<void> {
       ? [godotInstallationPath, exportTemplatePath]
       : [godotInstallationPath]
     const cacheKey = includeTemplates ? godotUrl : `${godotUrl}-no-templates`
-    const cached = await cache.restoreCache(cachedPaths.slice(), cacheKey)
+    let cached = undefined
+
+    if (useCache) {
+      cached = await cache.restoreCache(cachedPaths.slice(), cacheKey)
+    } else {
+      core.info(`⏭️ Not using cache`)
+    }
 
     let executables: string[]
     if (!cached) {
@@ -217,11 +224,13 @@ async function run(platform: Platform): Promise<void> {
         core.endGroup()
       }
 
-      // Save extracted Godot contents to cache
-      core.startGroup(`💾 Saving extracted Godot download to cache...`)
-      await cache.saveCache(cachedPaths, cacheKey)
-      core.info(`✅ Godot saved to cache`)
-      core.endGroup()
+      if (useCache) {
+        // Save extracted Godot contents to cache
+        core.startGroup(`💾 Saving extracted Godot download to cache...`)
+        await cache.saveCache(cachedPaths, cacheKey)
+        core.info(`✅ Godot saved to cache`)
+        core.endGroup()
+      }
     } else {
       core.info(`🎉 Previous Godot download found in cache!`)
       core.endGroup()

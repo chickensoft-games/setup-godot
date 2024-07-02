@@ -63,6 +63,7 @@ function run(platform) {
         const godotSharpRelease = core.getBooleanInput('godot-sharp-release');
         const checkoutDirectory = (_a = process.env['GITHUB_WORKSPACE']) !== null && _a !== void 0 ? _a : '';
         const includeTemplates = core.getBooleanInput('include-templates');
+        const useCache = core.getBooleanInput('cache');
         const userDir = os.homedir();
         const downloadsDir = path_1.default.join(userDir, downloadsRelativePath);
         const installationDir = path_1.default.join(userDir, pathRelative);
@@ -134,7 +135,13 @@ function run(platform) {
                 ? [godotInstallationPath, exportTemplatePath]
                 : [godotInstallationPath];
             const cacheKey = includeTemplates ? godotUrl : `${godotUrl}-no-templates`;
-            const cached = yield cache.restoreCache(cachedPaths.slice(), cacheKey);
+            let cached = undefined;
+            if (useCache) {
+                cached = yield cache.restoreCache(cachedPaths.slice(), cacheKey);
+            }
+            else {
+                core.info(`⏭️ Not using cache`);
+            }
             let executables;
             if (!cached) {
                 // Download Godot
@@ -183,11 +190,13 @@ function run(platform) {
                     core.info(`✅ Files shown`);
                     core.endGroup();
                 }
-                // Save extracted Godot contents to cache
-                core.startGroup(`💾 Saving extracted Godot download to cache...`);
-                yield cache.saveCache(cachedPaths, cacheKey);
-                core.info(`✅ Godot saved to cache`);
-                core.endGroup();
+                if (useCache) {
+                    // Save extracted Godot contents to cache
+                    core.startGroup(`💾 Saving extracted Godot download to cache...`);
+                    yield cache.saveCache(cachedPaths, cacheKey);
+                    core.info(`✅ Godot saved to cache`);
+                    core.endGroup();
+                }
             }
             else {
                 core.info(`🎉 Previous Godot download found in cache!`);
