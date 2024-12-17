@@ -63,7 +63,7 @@ jobs:
           version: 4.0.0-beta16 # also valid: 4.0.0.rc1 or 4.0.0, etc
           # Use .NET-enabled version of Godot (the default is also true).
           use-dotnet: true
-          # Include the Godot Export Templtes (the default is false).
+          # Include the Godot Export Templates (the default is false).
           include-templates: true
 
       - name: 🔬 Verify Setup
