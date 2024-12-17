@@ -66,7 +66,7 @@ async function run(platform: Platform): Promise<void> {
   let versionName = ''
   let godotUrl = ''
   let exportTemplateUrl = ''
-
+  core.info(`Using custom url ${customUrl}`)
   if (customUrl.length > 0) {
     // Если задан customUrl, используем его вместо вычислений по версии
     core.info(`😎 Using custom Godot build from ${customUrl}`)

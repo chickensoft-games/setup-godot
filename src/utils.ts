@@ -17,6 +17,7 @@ export interface Platform {
    * Returns the path to the unzipped file for the platform.
    * @param installationDir Installation directory.
    * @param versionName Version name.
+   * @param useDotnet
    */
   getUnzippedPath(
     installationDir: string,
