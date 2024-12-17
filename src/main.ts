@@ -21,11 +21,12 @@ async function run(platform: Platform): Promise<void> {
     .getInput('downloads-path')
     .replace(/\s/g, '')
   let version = core.getInput('version').replace(/\s/g, '')
+  const customUrl = core.getInput('custom_url').trim() 
   const useDotnet = core.getBooleanInput('use-dotnet')
   const binRelativePath = core.getInput('bin-path').replace(/\s/g, '')
   const godotSharpRelease = core.getBooleanInput('godot-sharp-release')
   const checkoutDirectory = process.env['GITHUB_WORKSPACE'] ?? ''
-  const includeTemplates = core.getBooleanInput('include-templates')
+  let includeTemplates = core.getBooleanInput('include-templates')
   const useCache = core.getBooleanInput('cache')
 
   const userDir = os.homedir()
@@ -61,13 +62,38 @@ async function run(platform: Platform): Promise<void> {
     version = globalJson['msbuild-sdks']['Godot.NET.Sdk'] ?? ''
   }
 
-  // Compute derived information from Godot version.
-  const versionName = getGodotFilenameFromVersionString(
-    version,
-    platform,
-    useDotnet
-  )
-  const godotUrl = getGodotUrl(version, platform, useDotnet, false)
+  // Определяем значения для godotUrl, versionName и exportTemplateUrl
+  let versionName = ''
+  let godotUrl = ''
+  let exportTemplateUrl = ''
+
+  if (customUrl.length > 0) {
+    // Если задан customUrl, используем его вместо вычислений по версии
+    core.info(`😎 Using custom Godot build from ${customUrl}`)
+    versionName = 'custom_godot'
+    godotUrl = customUrl
+
+    // При использовании customUrl определить экспортные шаблоны нельзя (по умолчанию их нет)
+    // Можно либо запретить, либо проигнорировать includeTemplates.
+    // Тут просто отключаем.
+    if (includeTemplates) {
+      core.info(`⚠️  Templates are not supported with custom builds. Skipping templates.`)
+    }
+    includeTemplates = false
+    exportTemplateUrl = ''
+  } else {
+    // Стандартная логика
+    versionName = getGodotFilenameFromVersionString(
+      version,
+      platform,
+      useDotnet
+    )
+    godotUrl = getGodotUrl(version, platform, useDotnet, false)
+    exportTemplateUrl = includeTemplates
+      ? getGodotUrl(version, platform, useDotnet, true)
+      : ''
+  }
+
   const godotDownloadPath = path.join(downloadsDir, `${versionName}.zip`)
   const godotInstallationPath = platform.getUnzippedPath(
     installationDir,
@@ -75,10 +101,6 @@ async function run(platform: Platform): Promise<void> {
     useDotnet
   )
   const binDir = path.join(userDir, binRelativePath)
-
-  const exportTemplateUrl = includeTemplates
-    ? getGodotUrl(version, platform, useDotnet, true)
-    : ''
   const exportTemplatePath = includeTemplates
     ? getExportTemplatePath(version, platform, useDotnet)
     : ''
@@ -174,7 +196,7 @@ async function run(platform: Platform): Promise<void> {
       core.info(`✅ Files shown`)
       core.endGroup()
 
-      if (includeTemplates) {
+      if (includeTemplates && exportTemplateUrl) {
         core.startGroup(
           `📥 Downloading Export Templates to ${exportTemplateDownloadPath}...`
         )
@@ -210,10 +232,7 @@ async function run(platform: Platform): Promise<void> {
           exportTemplatePath
         )
         core.info(
-          `✅ ${path.join(
-            path.dirname(exportTemplateExtractedPath),
-            'templates'
-          )} moved to ${exportTemplatePath}`
+          `✅ templates moved to ${exportTemplatePath}`
         )
         core.endGroup()
 
