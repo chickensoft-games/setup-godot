@@ -285,7 +285,7 @@ export async function findExecutablesRecursively(
     } else {
       // Test if file is executable. GodotSharp.dll is always considered an
       // executable.
-      let isExecutable = file.name === 'GodotSharp.dll'
+      let isExecutable = file.name === 'GodotSharp.dll' ? true : false
       if (!isExecutable) {
         if (platform instanceof Windows) {
           // fs.constants.X_OK doesn't seem to work on Windows.
