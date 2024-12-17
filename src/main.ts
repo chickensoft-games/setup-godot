@@ -21,7 +21,7 @@ async function run(platform: Platform): Promise<void> {
     .getInput('downloads-path')
     .replace(/\s/g, '')
   let version = core.getInput('version').replace(/\s/g, '')
-  const customUrl = core.getInput('custom_url').trim() 
+  const customUrl = core.getInput('custom-url').replace(/\s/g, '')
   const useDotnet = core.getBooleanInput('use-dotnet')
   const binRelativePath = core.getInput('bin-path').replace(/\s/g, '')
   const godotSharpRelease = core.getBooleanInput('godot-sharp-release')

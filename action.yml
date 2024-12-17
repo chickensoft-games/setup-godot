@@ -37,7 +37,7 @@ inputs:
       <Project Sdk="Godot.NET.Sdk/4.0.0"> <!-- BAD -->
       ```
     required: true
-  custom_url:
+  custom-url:
     description: >-
       Optional custom URL to download a custom Godot build. If set, the action will
       download and use this build instead of determining a version from `version`.
@@ -45,7 +45,7 @@ inputs:
       ```yaml
       - uses: Mimyr-Games-LTD/setup-godot-custom@v1
         with:
-          custom_url: 'https://example.com/my_custom_godot_build.zip'
+          custom-url: 'https://example.com/my_custom_godot_build.zip'
       ```
     required: false
     default: ''
