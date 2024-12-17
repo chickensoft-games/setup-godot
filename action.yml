@@ -1,7 +1,7 @@
-name: 'Setup Godot Action'
+name: 'Setup Godot Action Custom'
 description: >-
   Setup Godot for headless use with macOS, Windows, and Linux CI/CD runners.
-author: 'Chickensoft'
+author: 'Chickensoft & Mimyr-Games-LTD'
 branding:
   icon: 'hard-drive'
   color: 'white'
