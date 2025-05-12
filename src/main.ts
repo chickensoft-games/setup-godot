@@ -155,7 +155,7 @@ async function run(platform: Platform): Promise<void> {
 
       // If the godot installation folder already exists, remove it before extracting the ZIP file. This will "uninstall" other installations (e.g. on version changes).
       if (fs.existsSync(installationDir))
-        fs.rmdirSync(installationDir, {recursive: true})
+        fs.rmSync(installationDir, {recursive: true, force: true})
 
       const godotExtractedPath = await toolsCache.extractZip(
         godotDownloadedPath,
