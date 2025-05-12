@@ -38,15 +38,21 @@ jobs:
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: true
       DOTNET_NOLOGO: true
+      # Smaller cache size
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
     defaults:
       run:
         # Use bash shells on all platforms.
         shell: bash
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         name: 🧾 Checkout
+        # Disable fetching history as most of the time it is useless
+        filter: tree:0
+        fetch-depth: 0
 
-      - uses: actions/setup-dotnet@v3
+      - uses: actions/setup-dotnet@v4
         name: 💽 Setup .NET SDK
         with:
           # Use the .NET SDK from global.json in the root of the repository.
@@ -55,12 +61,12 @@ jobs:
       - name: 📦 Restore Dependencies
         run: dotnet restore
 
-      - uses: chickensoft-games/setup-godot@v1
+      - uses: chickensoft-games/setup-godot@v2
         name: 🤖 Setup Godot
         with:
           # Version must include major, minor, and patch, and be >= 4.0.0
           # Pre-release label is optional.
-          version: 4.0.0-beta16 # also valid: 4.0.0.rc1 or 4.0.0, etc
+          version: 4.0.0-beta16 # also valid: 4.0.0.rc1 or 4.0.0 or "global.json", etc
           # Use .NET-enabled version of Godot (the default is also true).
           use-dotnet: true
           # Include the Godot Export Templates (the default is false).
@@ -75,7 +81,7 @@ jobs:
         run: godot --headless --build-solutions --quit || exit 0
 
       - name: 🦺 Build Projects
-        run: dotnet build
+        run: dotnet build --configuration Release
 
       # Do whatever you want!
 ```
@@ -91,7 +97,7 @@ The Godot version should be specified the same as any [GodotSharp] version strin
 In place of a version, you can specify `global` or `global.json` to use the version of Godot specified by the project's global.json file.
 
 ```yaml
-  - uses: chickensoft-games/setup-godot@v1
+  - uses: chickensoft-games/setup-godot@v2
     name: 🤖 Setup Godot
     with:
       version: global.json # use Godot version specified by global.json
