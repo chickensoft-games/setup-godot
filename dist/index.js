@@ -57,9 +57,10 @@ const core = __importStar(__nccwpck_require__(7484));
 const toolsCache = __importStar(__nccwpck_require__(3472));
 const fs = __importStar(__nccwpck_require__(9896));
 const os = __importStar(__nccwpck_require__(857));
+const child_process = __importStar(__nccwpck_require__(5317));
+const process = __importStar(__nccwpck_require__(932));
 const path_1 = __importDefault(__nccwpck_require__(6928));
 const utils_1 = __nccwpck_require__(9277);
-const child_process = __importStar(__nccwpck_require__(1421));
 function run(platform) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c;
@@ -255,8 +256,15 @@ function run(platform) {
                 fs.rmSync(binDir, { recursive: true, force: true });
                 fs.mkdirSync(binDir, { recursive: true });
             }
-            child_process.execSync(`ln -s ${godotExecutable} ${godotAlias}`);
-            // fs.linkSync(godotExecutable, godotAlias)
+            // `fs.linkSync` has some issues on macOS for Godot executable
+            // it does not create symlink at all, it copies whole file
+            // and corrupts it a way that Godot gets killed by kernel (Killed: 9)
+            if (process.platform === "darwin") {
+                child_process.execSync(`ln -s "${godotExecutable}" "${godotAlias}"`);
+            }
+            else {
+                fs.linkSync(godotExecutable, godotAlias);
+            }
             core.info(`✅ Symlink to Godot created`);
             const godotSharpDirAlias = path_1.default.join(binDir, 'GodotSharp');
             if (useDotnet) {
@@ -89154,14 +89162,6 @@ module.exports = require("net");
 
 /***/ }),
 
-/***/ 1421:
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("node:child_process");
-
-/***/ }),
-
 /***/ 7598:
 /***/ ((module) => {
 
@@ -89215,6 +89215,14 @@ module.exports = require("path");
 
 "use strict";
 module.exports = require("perf_hooks");
+
+/***/ }),
+
+/***/ 932:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("process");
 
 /***/ }),
 

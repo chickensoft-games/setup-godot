@@ -3,6 +3,8 @@ import * as core from '@actions/core'
 import * as toolsCache from '@actions/tool-cache'
 import * as fs from 'fs'
 import * as os from 'os'
+import * as child_process from 'child_process'
+import * as process from 'process'
 import path from 'path'
 
 import {
@@ -13,7 +15,6 @@ import {
   getPlatform,
   Platform
 } from './utils'
-import * as child_process from 'node:child_process'
 
 async function run(platform: Platform): Promise<void> {
   // Get action inputs
@@ -296,8 +297,15 @@ async function run(platform: Platform): Promise<void> {
       fs.mkdirSync(binDir, {recursive: true})
     }
 
-    child_process.execSync(`ln -s ${godotExecutable} ${godotAlias}`);
-    // fs.linkSync(godotExecutable, godotAlias)
+    // `fs.linkSync` has some issues on macOS for Godot executable
+    // it does not create symlink at all, it copies whole file
+    // and corrupts it a way that Godot gets killed by kernel (Killed: 9)
+    if (process.platform === "darwin") {
+      child_process.execSync(`ln -s "${godotExecutable}" "${godotAlias}"`)
+    } else {
+      fs.linkSync(godotExecutable, godotAlias)
+    }
+
     core.info(`✅ Symlink to Godot created`)
     const godotSharpDirAlias = path.join(binDir, 'GodotSharp')
     if (useDotnet) {
