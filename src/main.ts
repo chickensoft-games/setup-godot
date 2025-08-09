@@ -13,6 +13,7 @@ import {
   getPlatform,
   Platform
 } from './utils'
+import * as child_process from 'node:child_process'
 
 async function run(platform: Platform): Promise<void> {
   // Get action inputs
@@ -295,7 +296,8 @@ async function run(platform: Platform): Promise<void> {
       fs.mkdirSync(binDir, {recursive: true})
     }
 
-    fs.linkSync(godotExecutable, godotAlias)
+    child_process.execSync(`ln -s ${godotExecutable} ${godotAlias}`);
+    // fs.linkSync(godotExecutable, godotAlias)
     core.info(`✅ Symlink to Godot created`)
     const godotSharpDirAlias = path.join(binDir, 'GodotSharp')
     if (useDotnet) {
