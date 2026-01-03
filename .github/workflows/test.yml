@@ -35,7 +35,7 @@ jobs:
         # Use bash shells on all platforms.
         shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         name: 🧾 Checkout
 
       - uses: actions/setup-dotnet@v4
@@ -67,7 +67,7 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         name: 🧾 Checkout
 
       - uses: ./
@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set Node.js 20.x
         uses: actions/setup-node@v6
