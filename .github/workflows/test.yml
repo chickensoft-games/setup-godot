@@ -38,7 +38,7 @@ jobs:
       - uses: actions/checkout@v4
         name: 🧾 Checkout
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         if: ${{ matrix.use-dotnet }}
         name: 💽 Setup .NET SDK
         with:
