@@ -3,8 +3,6 @@ on:
   pull_request:
     paths-ignore:
       - '**.md'
-    tags-ignore:
-      - '**'
   push:
     branches:
       - '**'
@@ -85,29 +83,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: 🧾 Checkout
+        uses: actions/checkout@v6
 
-      - name: Set Node.js 20.x
+      - name: 📐 Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 20.x
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: npm ci
 
-      - name: Rebuild the dist/ directory
+      - name: 🔨 Rebuild dist/
         run: |
           npm run build
           npm run package
 
-      - name: Compare the expected and actual dist/ directories
+      - name: 🔎 Verify dist/ matches committed
+        id: diff
         run: |
           if [ "$(git diff --ignore-all-space --ignore-space-at-eol dist/ | wc -l)" -gt "0" ]; then
-            echo "Detected uncommitted changes after build.  See status below:"
+            echo "Detected uncommitted changes after build. See status below:"
             git diff
             exit 1
           fi
-        id: diff
 
       # If index.js was different than expected, upload the expected version as an artifact
       - uses: actions/upload-artifact@v4

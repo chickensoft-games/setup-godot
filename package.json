@@ -10,10 +10,8 @@
     "format-check": "prettier --check '**/*.ts'",
     "lint": "eslint src/**/*.ts",
     "package": "esbuild src/main.ts --bundle --platform=node --target=node24 --format=cjs --sourcemap --outfile=dist/index.js",
-    "package-local": "export NODE_OPTIONS=--openssl-legacy-provider; ncc build --source-map --license licenses.txt",
     "test": "vitest run",
-    "all": "npm run build && npm run format && npm run lint && npm run package && npm test",
-    "all-local": "npm run build && npm run format && npm run lint && npm run package-local && npm test"
+    "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
   },
   "repository": {
     "type": "git",
