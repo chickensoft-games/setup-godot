@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest'
+import {describe, expect, test} from 'vitest'
 import * as os from 'os'
 import * as path from 'path'
 
@@ -45,41 +45,41 @@ describe('getGodotUrl', () => {
     })
     test('windows arm64', () => {
       expect(
-          getGodotUrl('4.6.0', getPlatform('win32', 'arm64'), true, false)
+        getGodotUrl('4.6.0', getPlatform('win32', 'arm64'), true, false)
       ).toEqual(
-          'https://github.com/godotengine/godot-builds/releases/download/4.6-stable/Godot_v4.6-stable_mono_windows_arm64.zip'
+        'https://github.com/godotengine/godot-builds/releases/download/4.6-stable/Godot_v4.6-stable_mono_windows_arm64.zip'
       )
     })
     test('linux amd64', () => {
       expect(
-          getGodotUrl('4.6.0', getPlatform('linux', 'x64'), true, false)
+        getGodotUrl('4.6.0', getPlatform('linux', 'x64'), true, false)
       ).toEqual(
-          'https://github.com/godotengine/godot-builds/releases/download/4.6-stable/Godot_v4.6-stable_mono_linux_x86_64.zip'
+        'https://github.com/godotengine/godot-builds/releases/download/4.6-stable/Godot_v4.6-stable_mono_linux_x86_64.zip'
       )
     })
     test('linux arm64', () => {
       expect(
-          getGodotUrl('4.6.0', getPlatform('linux', 'arm64'), true, false)
+        getGodotUrl('4.6.0', getPlatform('linux', 'arm64'), true, false)
       ).toEqual(
-          'https://github.com/godotengine/godot-builds/releases/download/4.6-stable/Godot_v4.6-stable_mono_linux_arm64.zip'
+        'https://github.com/godotengine/godot-builds/releases/download/4.6-stable/Godot_v4.6-stable_mono_linux_arm64.zip'
       )
     })
     test('darwin amd64', () => {
       expect(
-          getGodotUrl('4.6.0', getPlatform('darwin', 'x64'), true, false)
+        getGodotUrl('4.6.0', getPlatform('darwin', 'x64'), true, false)
       ).toEqual(
-          'https://github.com/godotengine/godot-builds/releases/download/4.6-stable/Godot_v4.6-stable_mono_macos.universal.zip'
+        'https://github.com/godotengine/godot-builds/releases/download/4.6-stable/Godot_v4.6-stable_mono_macos.universal.zip'
       )
     })
     test('darwin arm64', () => {
       expect(
-          getGodotUrl('4.6.0', getPlatform('darwin', 'arm64'), true, false)
+        getGodotUrl('4.6.0', getPlatform('darwin', 'arm64'), true, false)
       ).toEqual(
-          'https://github.com/godotengine/godot-builds/releases/download/4.6-stable/Godot_v4.6-stable_mono_macos.universal.zip'
+        'https://github.com/godotengine/godot-builds/releases/download/4.6-stable/Godot_v4.6-stable_mono_macos.universal.zip'
       )
     })
   })
-  
+
   describe('useDotnet = true', () => {
     test('4.0.0-beta1', () => {
       expect(
@@ -115,7 +115,12 @@ describe('getGodotUrl', () => {
         'https://github.com/godotengine/godot-builds/releases/download/4.0-beta16/Godot_v4.0-beta16_mono_win64.zip'
       )
       expect(
-        getGodotUrl('4.0.0-beta.16', getPlatform('darwin', 'arm64'), true, false)
+        getGodotUrl(
+          '4.0.0-beta.16',
+          getPlatform('darwin', 'arm64'),
+          true,
+          false
+        )
       ).toEqual(
         'https://github.com/godotengine/godot-builds/releases/download/4.0-beta16/Godot_v4.0-beta16_mono_macos.universal.zip'
       )
@@ -138,21 +143,31 @@ describe('getGodotUrl', () => {
       )
     })
     test('4.0.0', () => {
-      expect(getGodotUrl('4.0.0', getPlatform('linux', 'x64'), true, false)).toEqual(
+      expect(
+        getGodotUrl('4.0.0', getPlatform('linux', 'x64'), true, false)
+      ).toEqual(
         'https://github.com/godotengine/godot-builds/releases/download/4.0-stable/Godot_v4.0-stable_mono_linux_x86_64.zip'
       )
-      expect(getGodotUrl('4.0.0', getPlatform('win32', 'x64'), true, false)).toEqual(
+      expect(
+        getGodotUrl('4.0.0', getPlatform('win32', 'x64'), true, false)
+      ).toEqual(
         'https://github.com/godotengine/godot-builds/releases/download/4.0-stable/Godot_v4.0-stable_mono_win64.zip'
       )
-      expect(getGodotUrl('4.0.0', getPlatform('darwin', 'x64'), true, false)).toEqual(
+      expect(
+        getGodotUrl('4.0.0', getPlatform('darwin', 'x64'), true, false)
+      ).toEqual(
         'https://github.com/godotengine/godot-builds/releases/download/4.0-stable/Godot_v4.0-stable_mono_macos.universal.zip'
       )
-      expect(getGodotUrl('4.0.0', getPlatform('linux', 'x64'), true, true)).toEqual(
+      expect(
+        getGodotUrl('4.0.0', getPlatform('linux', 'x64'), true, true)
+      ).toEqual(
         'https://github.com/godotengine/godot-builds/releases/download/4.0-stable/Godot_v4.0-stable_mono_export_templates.tpz'
       )
     })
     test('3.5.2', () => {
-      expect(getGodotUrl('3.5.2', getPlatform('linux', 'x64'), true, true)).toEqual(
+      expect(
+        getGodotUrl('3.5.2', getPlatform('linux', 'x64'), true, true)
+      ).toEqual(
         'https://github.com/godotengine/godot-builds/releases/download/3.5.2-stable/Godot_v3.5.2-stable_mono_export_templates.tpz'
       )
     })
@@ -193,18 +208,27 @@ describe('getGodotUrl', () => {
         'https://github.com/godotengine/godot-builds/releases/download/4.0-beta16/Godot_v4.0-beta16_win64.exe.zip'
       )
       expect(
-        getGodotUrl('4.0.0-beta.16', getPlatform('darwin', 'arm64'), false, false)
+        getGodotUrl(
+          '4.0.0-beta.16',
+          getPlatform('darwin', 'arm64'),
+          false,
+          false
+        )
       ).toEqual(
         'https://github.com/godotengine/godot-builds/releases/download/4.0-beta16/Godot_v4.0-beta16_macos.universal.zip'
       )
     })
     test('4.0.0', () => {
-      expect(getGodotUrl('4.0.0', getPlatform('linux', 'x64'), false, true)).toEqual(
+      expect(
+        getGodotUrl('4.0.0', getPlatform('linux', 'x64'), false, true)
+      ).toEqual(
         'https://github.com/godotengine/godot-builds/releases/download/4.0-stable/Godot_v4.0-stable_export_templates.tpz'
       )
     })
     test('3.5.2', () => {
-      expect(getGodotUrl('3.5.2', getPlatform('linux', 'x64'), false, true)).toEqual(
+      expect(
+        getGodotUrl('3.5.2', getPlatform('linux', 'x64'), false, true)
+      ).toEqual(
         'https://github.com/godotengine/godot-builds/releases/download/3.5.2-stable/Godot_v3.5.2-stable_export_templates.tpz'
       )
     })
@@ -233,7 +257,11 @@ describe('getExportTemplatePath', () => {
         )
       )
       expect(
-        getExportTemplatePath('4.0.0-beta1', getPlatform('darwin', 'arm64'), true)
+        getExportTemplatePath(
+          '4.0.0-beta1',
+          getPlatform('darwin', 'arm64'),
+          true
+        )
       ).toEqual(
         path.join(
           os.homedir(),
@@ -352,7 +380,11 @@ describe('getExportTemplatePath', () => {
         )
       )
       expect(
-        getExportTemplatePath('4.0.0-beta1', getPlatform('darwin', 'arm64'), false)
+        getExportTemplatePath(
+          '4.0.0-beta1',
+          getPlatform('darwin', 'arm64'),
+          false
+        )
       ).toEqual(
         path.join(
           os.homedir(),

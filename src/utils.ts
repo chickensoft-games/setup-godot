@@ -289,7 +289,10 @@ export function getGodotFilenameFromVersionString(
   return getGodotFilename(parseVersion(versionString), platform, useDotnet)
 }
 
-export function getPlatform(processPlatform: NodeJS.Platform, arch = os.arch()): Platform {
+export function getPlatform(
+  processPlatform: NodeJS.Platform,
+  arch = os.arch()
+): Platform {
   switch (processPlatform) {
     case 'linux':
       core.info('🐧 Running on Linux')
@@ -337,7 +340,7 @@ export async function findExecutablesRecursively(
           try {
             fs.accessSync(filePath, fs.constants.X_OK)
             isExecutable = true
-          } catch (error) {
+          } catch {
             // File is not executable.
           }
         }
