@@ -44,7 +44,7 @@
     "globals": "^17.11.0",
     "jiti": "^2.7.0",
     "js-yaml": "^4.1.1",
-    "prettier": "^3.8.1",
+    "prettier": "^3.9.9",
     "ts-jest": "^29.4.6",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
