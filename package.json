@@ -48,5 +48,10 @@
     "ts-jest": "^29.4.6",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "unrs-resolver@1.12.2": true,
+    "@parcel/watcher@2.6.0": true
   }
 }
