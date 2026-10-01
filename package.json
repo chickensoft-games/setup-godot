@@ -29,7 +29,7 @@
     "@actions/core": "^3.0.0",
     "@actions/tool-cache": "^4.0.0",
     "@eslint/eslintrc": "^3.3.6",
-    "eslint-plugin-jest": "^29.16.5",
+    "eslint-plugin-jest": "^29.16.6",
     "normalize-path": "^3.0.0"
   },
   "devDependencies": {
