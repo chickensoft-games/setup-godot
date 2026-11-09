@@ -78,6 +78,83 @@ describe('getGodotUrl', () => {
         'https://github.com/godotengine/godot-builds/releases/download/4.6-stable/Godot_v4.6-stable_mono_macos.universal.zip'
       )
     })
+    test('darwin arm64 4.8.0-beta1', () => {
+      expect(
+        getGodotUrl('4.8.0-beta1', getPlatform('darwin', 'arm64'), false, false)
+      ).toEqual(
+        'https://github.com/godotengine/godot-builds/releases/download/4.8-beta1/Godot_v4.8-beta1_macos.arm64.zip'
+      )
+      expect(
+        getGodotUrl('4.8.0-beta1', getPlatform('darwin', 'arm64'), true, false)
+      ).toEqual(
+        'https://github.com/godotengine/godot-builds/releases/download/4.8-beta1/Godot_v4.8-beta1_mono_macos.arm64.zip'
+      )
+    })
+    test('darwin amd64 4.8.0-beta1', () => {
+      expect(
+        getGodotUrl('4.8.0-beta1', getPlatform('darwin', 'x64'), false, false)
+      ).toEqual(
+        'https://github.com/godotengine/godot-builds/releases/download/4.8-beta1/Godot_v4.8-beta1_macos.x86_64.zip'
+      )
+      expect(
+        getGodotUrl('4.8.0-beta1', getPlatform('darwin', 'x64'), true, false)
+      ).toEqual(
+        'https://github.com/godotengine/godot-builds/releases/download/4.8-beta1/Godot_v4.8-beta1_mono_macos.x86_64.zip'
+      )
+    })
+    test('darwin 4.8.0-beta1 export templates', () => {
+      expect(
+        getGodotUrl('4.8.0-beta1', getPlatform('darwin', 'arm64'), true, true)
+      ).toEqual(
+        'https://github.com/godotengine/godot-builds/releases/download/4.8-beta1/Godot_v4.8-beta1_mono_export_templates.tpz'
+      )
+    })
+    test('darwin 4.8.0-dev7 stays universal', () => {
+      expect(
+        getGodotUrl('4.8.0-dev7', getPlatform('darwin', 'arm64'), false, false)
+      ).toEqual(
+        'https://github.com/godotengine/godot-builds/releases/download/4.8-dev7/Godot_v4.8-dev7_macos.universal.zip'
+      )
+      expect(
+        getGodotUrl('4.8.0-dev7', getPlatform('darwin', 'x64'), true, false)
+      ).toEqual(
+        'https://github.com/godotengine/godot-builds/releases/download/4.8-dev7/Godot_v4.8-dev7_mono_macos.universal.zip'
+      )
+    })
+    test('darwin 4.7.x stays universal', () => {
+      expect(
+        getGodotUrl('4.7.1', getPlatform('darwin', 'arm64'), false, false)
+      ).toEqual(
+        'https://github.com/godotengine/godot-builds/releases/download/4.7.1-stable/Godot_v4.7.1-stable_macos.universal.zip'
+      )
+    })
+    test('darwin 4.8.0 and later are per-arch', () => {
+      expect(
+        getGodotUrl('4.8.0', getPlatform('darwin', 'arm64'), false, false)
+      ).toEqual(
+        'https://github.com/godotengine/godot-builds/releases/download/4.8-stable/Godot_v4.8-stable_macos.arm64.zip'
+      )
+      expect(
+        getGodotUrl('4.8.0-rc1', getPlatform('darwin', 'x64'), true, false)
+      ).toEqual(
+        'https://github.com/godotengine/godot-builds/releases/download/4.8-rc1/Godot_v4.8-rc1_mono_macos.x86_64.zip'
+      )
+      expect(
+        getGodotUrl('4.9.0', getPlatform('darwin', 'x64'), false, false)
+      ).toEqual(
+        'https://github.com/godotengine/godot-builds/releases/download/4.9-stable/Godot_v4.9-stable_macos.x86_64.zip'
+      )
+      expect(
+        getGodotUrl('5.0.0', getPlatform('darwin', 'arm64'), true, false)
+      ).toEqual(
+        'https://github.com/godotengine/godot-builds/releases/download/5.0-stable/Godot_v5.0-stable_mono_macos.arm64.zip'
+      )
+    })
+    test('darwin unsupported arch', () => {
+      expect(() => getPlatform('darwin', 'ia32')).toThrow(
+        'Unsupported macOS arch'
+      )
+    })
   })
 
   describe('useDotnet = true', () => {

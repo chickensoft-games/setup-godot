@@ -6,7 +6,7 @@ import * as os from 'node:os'
 
 export interface Platform {
   /** Godot installation filename suffix. */
-  godotFilenameSuffix(useDotnet: boolean): string
+  godotFilenameSuffix(useDotnet: boolean, version: SemanticVersion): string
   /**
    * Returns true if the given path is most likely the Godot executable for
    * the platform.
@@ -120,8 +120,29 @@ export class MacOS implements Platform {
     '/Library/Application Support/Godot/'
   )
 
-  godotFilenameSuffix(useDotnet: boolean): string {
-    return `${useDotnet ? '_mono' : ''}_macos.universal`
+  private readonly arch: string
+
+  constructor(osArch: ReturnType<typeof os.arch>) {
+    // According to: https://github.com/godotengine/godot-builds/releases
+    const toGodotArchMapping: Record<string, string | undefined> = {
+      arm64: 'arm64',
+      x64: 'x86_64'
+    }
+
+    const mappedArch = toGodotArchMapping[osArch]
+
+    if (mappedArch === undefined) {
+      throw new Error(
+        `⛔Unsupported macOS arch: ${osArch}, supported: arm64, x64`
+      )
+    }
+
+    this.arch = mappedArch
+  }
+
+  godotFilenameSuffix(useDotnet: boolean, version: SemanticVersion): string {
+    const target = hasPerArchMacOSBuilds(version) ? this.arch : 'universal'
+    return `${useDotnet ? '_mono' : ''}_macos.${target}`
   }
   isGodotExecutable(basename: string): boolean {
     return basename.toLowerCase() === 'godot'
@@ -135,8 +156,20 @@ export class MacOS implements Platform {
   }
 }
 
+/**
+ * Official macOS builds are distributed per architecture instead of as a
+ * universal binary starting with 4.8-beta1 (godotengine/godot#123112).
+ */
+function hasPerArchMacOSBuilds(version: SemanticVersion): boolean {
+  const major = Number(version.major)
+  const minor = Number(version.minor)
+  if (major !== 4) return major > 4
+  if (minor !== 8) return minor > 8
+  return !version.label.startsWith('dev')
+}
+
 /** Semantic version representation */
-interface SemanticVersion {
+export interface SemanticVersion {
   /** Version major number */
   major: string
   /** Version minor number */
@@ -255,7 +288,7 @@ export function getGodotFilename(
   platform: Platform,
   useDotnet: boolean
 ): string {
-  return getGodotFilenameBase(version) + platform.godotFilenameSuffix(useDotnet)
+  return getGodotFilenameBase(version) + platform.godotFilenameSuffix(useDotnet, version)
 }
 
 export function getGodotFilenameBase(version: SemanticVersion): string {
@@ -302,7 +335,7 @@ export function getPlatform(
       return new Windows(arch)
     case 'darwin':
       core.info('🍏 Running on macOS')
-      return new MacOS()
+      return new MacOS(arch)
     default:
       throw new Error(`⛔️ Unrecognized platform: ${process.platform}`)
   }
