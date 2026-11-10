@@ -14,7 +14,7 @@ on:
 
 jobs:
   tests:
-    name: 🧪 Test on ${{ matrix.os }}, .NET=${{ matrix.use-dotnet }}, include-templates=${{ matrix.include-templates }}
+    name: 🧪 Test ${{ matrix.version }} on ${{ matrix.os }}, .NET=${{ matrix.use-dotnet }}, include-templates=${{ matrix.include-templates }}
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     runs-on: ${{ matrix.os }}
     strategy:
@@ -22,9 +22,22 @@ jobs:
       fail-fast: false
       matrix:
         # Put the operating systems you want to run on here.
+        # macos-latest is arm64.
         os: [ubuntu-latest, macos-latest, windows-latest]
+        version: [4.0.0]
         use-dotnet: [false, true]
         include-templates: [false, true]
+        # 4.8.0-beta1 has per-arch macOS builds (macos-15-intel is x86_64);
+        # 4.0.0 above uses the universal build.
+        include:
+          - {os: macos-latest, version: 4.8.0-beta1, use-dotnet: false, include-templates: false}
+          - {os: macos-latest, version: 4.8.0-beta1, use-dotnet: false, include-templates: true}
+          - {os: macos-latest, version: 4.8.0-beta1, use-dotnet: true, include-templates: false}
+          - {os: macos-latest, version: 4.8.0-beta1, use-dotnet: true, include-templates: true}
+          - {os: macos-15-intel, version: 4.8.0-beta1, use-dotnet: false, include-templates: false}
+          - {os: macos-15-intel, version: 4.8.0-beta1, use-dotnet: false, include-templates: true}
+          - {os: macos-15-intel, version: 4.8.0-beta1, use-dotnet: true, include-templates: false}
+          - {os: macos-15-intel, version: 4.8.0-beta1, use-dotnet: true, include-templates: true}
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: true
       DOTNET_NOLOGO: true
@@ -47,7 +60,7 @@ jobs:
         with:
           # Version must include major, minor, and patch, and be >= 4.0.0
           # Pre-release label is optional.
-          version: 4.0.0
+          version: ${{ matrix.version }}
           use-dotnet: ${{ matrix.use-dotnet }}
           include-templates: ${{ matrix.include-templates }}
 

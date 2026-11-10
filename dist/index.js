@@ -68655,8 +68655,23 @@ var MacOS = class {
     os8.homedir(),
     "/Library/Application Support/Godot/"
   );
-  godotFilenameSuffix(useDotnet) {
-    return `${useDotnet ? "_mono" : ""}_macos.universal`;
+  arch;
+  constructor(osArch) {
+    const toGodotArchMapping = {
+      arm64: "arm64",
+      x64: "x86_64"
+    };
+    const mappedArch = toGodotArchMapping[osArch];
+    if (mappedArch === void 0) {
+      throw new Error(
+        `\u26D4Unsupported macOS arch: ${osArch}, supported: arm64, x64`
+      );
+    }
+    this.arch = mappedArch;
+  }
+  godotFilenameSuffix(useDotnet, version3) {
+    const target = hasPerArchMacOSBuilds(version3) ? this.arch : "universal";
+    return `${useDotnet ? "_mono" : ""}_macos.${target}`;
   }
   isGodotExecutable(basename5) {
     return basename5.toLowerCase() === "godot";
@@ -68665,6 +68680,13 @@ var MacOS = class {
     return path14.join(installationDir, `Godot${useDotnet ? "_mono" : ""}.app`);
   }
 };
+function hasPerArchMacOSBuilds(version3) {
+  const major = Number(version3.major);
+  const minor = Number(version3.minor);
+  if (major !== 4) return major > 4;
+  if (minor !== 8) return minor > 8;
+  return !version3.label.startsWith("dev");
+}
 var GODOT_URL_PREFIX = "https://github.com/godotengine/godot-builds/releases/download/";
 var GODOT_FILENAME_PREFIX = "Godot_v";
 var SEMANTIC_VERSION_REGEX = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
@@ -68723,7 +68745,7 @@ function getExportTemplatePath(versionString, platform3, useDotnet) {
   );
 }
 function getGodotFilename(version3, platform3, useDotnet) {
-  return getGodotFilenameBase(version3) + platform3.godotFilenameSuffix(useDotnet);
+  return getGodotFilenameBase(version3) + platform3.godotFilenameSuffix(useDotnet, version3);
 }
 function getGodotFilenameBase(version3) {
   const major = version3.major;
@@ -68757,7 +68779,7 @@ function getPlatform(processPlatform, arch3 = os8.arch()) {
       return new Windows(arch3);
     case "darwin":
       info("\u{1F34F} Running on macOS");
-      return new MacOS();
+      return new MacOS(arch3);
     default:
       throw new Error(`\u26D4\uFE0F Unrecognized platform: ${process.platform}`);
   }
